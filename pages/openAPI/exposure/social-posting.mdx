@@ -1,0 +1,107 @@
+# Social Posting
+
+Social Posting 데이터를 가져오기 위한 API입니다.
+
+
+## Authentication
+
+API에 접근하기 위해 API Key가 필합니다. 예시:
+
+```bash
+curl -X GET https://app-api.commerceos.ai/open/v1/exposures/social-posting \
+     -H "x-api-key: YOUR_API_KEY"
+```
+
+## Endpoints
+
+### Get User
+
+**Endpoint**: `GET /open/v1/exposures/social-posting`  
+
+#### Request
+
+| Field                   | Type    | Required | Description                         |
+|-------------------------|---------|----------|-------------------------------------|
+| `x-api-key` (Header)    | string  | Yes      | 사용자별 API Key.   |
+| `startDate` (Body)      | LocalDate  | Yes   | 검색할 Posting의 시작 날짜입니다.              |
+| `endDate` (Body)        | LocalDate  | Yes   | 검색할 Posting의 마지막 날짜입니다.             |
+
+#### Example Request
+
+```bash
+curl -X GET https://app-api.commerceos.ai/open/v1/exposures/social-posting?startDate=2024-01-01&endDate=2024-11-27 \
+     -H "x-api-key: YOUR_API_KEY"
+```
+
+#### Response
+
+| Field      | Type       | Required | Description                                           |
+|------------|------------|----------|----------------------------------------------|
+| `startDate` | LocalDateTime  | Yes      | 조회 기간의 시작 날짜입니다. ISO 8601 형식(`YYYY-MM-DD`)으로 제공됩니다. |
+| `endDate`   | LocalDateTime  | Yes      | 조회 기간의 종료 날짜입니다. ISO 8601 형식(`YYYY-MM-DD`)으로 제공됩니다. |
+| `result`    | array `SocialPostingResult`    | Yes      | `SocialPostingResult` 객체의 배열입니다.                            |
+
+
+- **SocialPostingResult**
+
+| Field         | Type       | Required | Description                                                                                       |
+|-------------------|------------|----------|------------------------------------------------------------------------------------------|
+| `id`             | number     | Yes      | 고유 ID입니다.                                                                            |
+| `postDate`       | string     | Yes      | 게시물이 작성된 날짜와 시간입니다. ISO 8601 형식 (`YYYY-MM-DDTHH:mm:ss`)으로 제공됩니다.      |
+| `collectTime`    | string     | Yes      | 데이터를 수집한 날짜와 시간입니다. ISO 8601 형식으로 제공됩니다.                              |
+| `shareLink`      | string     | Yes      | 게시물에 대한 공유 링크입니다.                                                             |
+| `platform`       | string     | Yes      | 게시물이 게시된 플랫폼입니다. 예: `x`.                                                     |
+| `region`         | string     | Yes      | 게시물이 작성된 지역입니다. 예: `N.Am`.                                                    |
+| `name`           | string     | Yes      | 계정 이름입니다. 예: `t-mobile`.                                                           |
+| `content`        | string     | Yes      | 게시물의 본문 내용입니다.                                                                  |
+| `hashtag`        | array      | Yes       | 게시물에 포함된 해시태그의 배열입니다.                                                     |
+| `brand`          | string     | Yes      | 게시물에서 언급된 브랜드 이름입니다. (해당하지 않을 경우 `other`)                            |
+| `brandList`      | string     | Yes      | 브랜드 리스트입니다.                                                                       |
+| `reason`         | string     | Yes      | 브랜드와의 관련성을 판단한 이유입니다.                                                    |
+| `productName`    | string     | Yes       | 게시물에서 언급된 제품 이름입니다.                                                        |
+| `productCategory`| string     | Yes       | 게시물에서 언급된 제품의 카테고리입니다.                                                   |
+| `image`          | string     | No       | 게시물과 관련된 이미지 링크입니다.                                                         |
+| `video`          | string     | No       | 게시물과 관련된 동영상 링크입니다.                                                         |
+| `summary`        | string     | Yes      | 게시물 내용의 요약입니다.                                                                  |
+| `likeCount`      | number     | No      | 게시물의 좋아요 수입니다.                                                                  |
+| `commentCount`   | number     | No      | 게시물의 댓글 수입니다.                                                                    |
+| `shareCount`     | number     | No      | 게시물의 공유 수입니다.                                                                    |
+| `screenshot`     | string     | No      | 게시물의 스크린샷 이미지 링크입니다.                                                       |
+| `postingType`    | string     | Yes      | 게시물의 유형입니다. 예: `POSTING`, `STORY`.                                                   |
+
+
+- **Status**: 200 OK
+- **Body**:
+
+```json
+{
+    "startDate": "2024-01-01",
+    "endDate": "2024-11-27",
+    "result": [
+        {
+            "id": 17746898995642368,
+            "postDate": "2024-04-01T17:26:46",
+            "collectTime": "2024-11-06T03:49:24",
+            "shareLink": "https://www.x.com/tmobile/status/1774850907274142181",
+            "platform": "x",
+            "region": "N.Am",
+            "name": "t-mobile",
+            "content": "oops, had my notifications turned off 🤷",
+            "hashtag": [],
+            "brand": "other",
+            "brandList": "",
+            "reason": "The input text does not mention any specific brand related to electronic devices.",
+            "productName": "",
+            "productCategory": "",
+            "image": "",
+            "video": "",
+            "summary": "The user mentions having their notifications turned off.",
+            "likeCount": 118,
+            "commentCount": 47,
+            "shareCount": 16,
+            "screenshot": "https://collected-data.commerceos.ai/samsung/sns/2024/11/08/12/x/t-mobile/PC/2024-04-01/1774850907274142181/images/screenshot.png",
+            "postingType": "POSTING"
+        }
+    ]
+}
+```
