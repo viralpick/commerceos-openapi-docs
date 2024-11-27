@@ -9,7 +9,6 @@ export default {
     ...withNextra(),
     reactStrictMode: true,
     output: 'export',
-    basePath: '/commerceos-openapi-docs',
     images: {
         unoptimized: true
     }
