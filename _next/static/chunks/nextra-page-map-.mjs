@@ -11,6 +11,12 @@ export const pageMap = [{
     name: "exposure",
     route: "/openAPI/exposure",
     children: [{
+      name: "pr-monitoring",
+      route: "/openAPI/exposure/pr-monitoring",
+      frontMatter: {
+        "sidebarTitle": "Pr Monitoring"
+      }
+    }, {
       name: "social-posting",
       route: "/openAPI/exposure/social-posting",
       frontMatter: {
