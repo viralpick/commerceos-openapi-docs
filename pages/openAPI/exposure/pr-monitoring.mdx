@@ -50,14 +50,14 @@ curl -X GET https://app-api.commerceos.ai/open/v1/exposures/pr-monitoring?startD
 | `publishedAt`    | string     | Yes      | 게시물이 작성된 날짜와 시간입니다. ISO 8601 형식 (`YYYY-MM-DDTHH:mm:ss`)으로 제공됩니다.               |
 | `collectTime`    | string     | Yes      | 데이터를 수집한 날짜와 시간입니다. ISO 8601 형식으로 제공됩니다.                                       |
 | `title`      | string     | Yes      | PR 게시물 제목입니다.                                                                              |
-| `content`       | string     | Yes      | PR 게시물의 내용입니다.                                                                         |
+| `content`       | string     | No      | PR 게시물의 내용입니다.                                                                         |
 | `summary`         | string     | Yes      | 게시물에 대한 요약 내용입니다.                                                                  |
 | `brand`           | string     | Yes      | 게시물에서 언급된 브랜드 이름입니다. (해당하지 않을 경우 `other`)                                     |
-| `product`        | string     | Yes      | 게시물에서 언급된 제품 이름입니다.                                                                |
+| `product`        | string     | No      | 게시물에서 언급된 제품 이름입니다.                                                                |
 | `reason`        | array      | Yes       | AI가 해당 게시물을 제공한 제품으로 판단한 이유입니다.                                                 |
-| `category`          | string     | Yes      |   게시물에서 언급된 제품 의 카테고리입니다.                                                      |
+| `category`          | string     | No      |   게시물에서 언급된 제품 의 카테고리입니다.                                                      |
 | `link`      | string     | Yes      | 게시글의 Link Url입니다.                                                                           |
-| `headerImageUrl`         | string     | Yes      | PR 페이지의 Header Image (배너) 링크입니다.                                             |
+| `headerImageUrl`         | string     | No      | PR 페이지의 Header Image (배너) 링크입니다.                                             |
 
 
 - **Status**: 200 OK
