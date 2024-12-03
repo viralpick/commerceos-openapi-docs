@@ -1,0 +1,113 @@
+# Pr Monitoring
+
+Pr Monitoring 데이터를 가져오기 위한 API입니다.
+
+
+## Authentication
+
+API에 접근하기 위해 API Key가 필합니다. 예시:
+
+```bash
+curl -X GET https://app-api.commerceos.ai/open/v1/exposures/pr-monitoring \
+     -H "x-api-key: YOUR_API_KEY"
+```
+
+## Endpoints
+
+### Get User
+
+**Endpoint**: `GET /open/v1/exposures/pr-monitoring`  
+
+#### Request
+
+| Field                   | Type    | Required | Description                         |
+|-------------------------|---------|----------|-------------------------------------|
+| `x-api-key` (Header)    | string  | Yes      | 사용자별 API Key.   |
+| `startDate` (Body)      | LocalDate  | Yes   | 검색할 Posting의 시작 날짜입니다.              |
+| `endDate` (Body)        | LocalDate  | Yes   | 검색할 Posting의 마지막 날짜입니다.             |
+
+#### Example Request
+
+```bash
+curl -X GET https://app-api.commerceos.ai/open/v1/exposures/pr-monitoring?startDate=2024-01-01&endDate=2024-11-27 \
+     -H "x-api-key: YOUR_API_KEY"
+```
+
+#### Response
+
+| Field      | Type       | Required | Description                                           |
+|------------|------------|----------|----------------------------------------------|
+| `startDate` | LocalDateTime  | Yes      | 조회 기간의 시작 날짜입니다. ISO 8601 형식(`YYYY-MM-DD`)으로 제공됩니다. |
+| `endDate`   | LocalDateTime  | Yes      | 조회 기간의 종료 날짜입니다. ISO 8601 형식(`YYYY-MM-DD`)으로 제공됩니다. |
+| `result`    | array `PrMonitoringResult`    | Yes      | `PrMonitoringResult` 객체의 배열입니다.                            |
+
+
+- **PrMonitoringResult**
+
+| Field         | Type       | Required | Description                                                                                       |
+|-------------------|------------|----------|------------------------------------------------------------------------------------------|
+| `id`             | number     | Yes      | 고유 ID입니다.                                                                               |
+| `publishedAt`    | string     | Yes      | 게시물이 작성된 날짜와 시간입니다. ISO 8601 형식 (`YYYY-MM-DDTHH:mm:ss`)으로 제공됩니다.               |
+| `collectTime`    | string     | Yes      | 데이터를 수집한 날짜와 시간입니다. ISO 8601 형식으로 제공됩니다.                                       |
+| `title`      | string     | Yes      | PR 게시물 제목입니다.                                                                              |
+| `content`       | string     | Yes      | PR 게시물의 내용입니다.                                                                         |
+| `summary`         | string     | Yes      | 게시물에 대한 요약 내용입니다.                                                                  |
+| `brand`           | string     | Yes      | 게시물에서 언급된 브랜드 이름입니다. (해당하지 않을 경우 `other`)                                     |
+| `product`        | string     | Yes      | 게시물에서 언급된 제품 이름입니다.                                                                |
+| `reason`        | array      | Yes       | AI가 해당 게시물을 제공한 제품으로 판단한 이유입니다.                                                 |
+| `category`          | string     | Yes      |   게시물에서 언급된 제품 의 카테고리입니다.                                                      |
+| `link`      | string     | Yes      | 게시글의 Link Url입니다.                                                                           |
+| `headerImageUrl`         | string     | Yes      | PR 페이지의 Header Image (배너) 링크입니다.                                             |
+
+
+- **Status**: 200 OK
+- **Body**:
+
+```json
+{
+    "startDate": "2024-04-04",
+    "endDate": "2024-04-04",
+    "result": [
+        {
+            "id": 26761645439057925,
+            "collectTime": "2024-11-25T04:50:05",
+            "prArticleId": "7000960e6f958c402510112602e26c6cbec7d4edd2937682f239e964a62d4b8c",
+            "publishedAt": "2024-04-04T00:00:00",
+            "title": "AT&T Commitment to Bridge Digital Divide Increases to $5 Billion",
+            "content": "Apr 4, 2024 Our decade-long commitment of internet services and digital literacy resources aims to reach 25 million people to help close the digital divide. ",
+            "summary": "AT&T commits $5 billion to bridge the digital divide for 25 million people.",
+            "brand": "other",
+            "reason": "The text mentions AT&T, which is not one of the specified brands (Samsung, Apple, Google).",
+            "category": "Other",
+            "link": "https://about.att.com/story/2024/digital-divide-recommitment.html",
+            "headerImageUrl": "https://kurve-imgs.s3.ap-northeast-2.amazonaws.com/samsung/pr/2024/11/25/04/att/PC/images/headerImage1.png"
+        },
+        {
+            "id": 25726856212774929,
+            "collectTime": "2024-11-08T12:19:45",
+            "prArticleId": "527cfd16134472b8ce1a6258975a321a062063425d9c1020d3913582dc0520ec",
+            "publishedAt": "2024-04-04T00:00:00",
+            "title": "",
+            "content": "T-Mobile Gives New 5G Internet Customers Free Blink Home Security Cameras This Moving Season",
+            "summary": "T-Mobile offers free Blink Home Security Cameras to new 5G internet customers.",
+            "brand": "other",
+            "reason": "The text does not mention any specific cell phone brand like Samsung, Apple, or Google. It only mentions T-Mobile, which is a telecommunications company, not a cell phone brand.",
+            "category": "Other",
+            "link": "https://www.t-mobile.com/news/offers/5g-internet-free-blink-smart-home-package",
+            "headerImageUrl": "https://kurve-imgs.s3.ap-northeast-2.amazonaws.com/samsung/pr/2024/11/08/12/t-mobile/PC/images/headerImage1.png"
+        },
+        {
+            "id": 27512227003105280,
+            "collectTime": "2024-11-26T13:28:15",
+            "prArticleId": "c5b838af9c9e39367acbc79c087ed0f62d3e907e17456a862278b3f2134d658d",
+            "publishedAt": "2024-04-04T00:00:00",
+            "title": "11 HP Kamera Terbaik 2024: Fotografi Canggih dalam Genggaman",
+            "content": "11 HP Kamera Terbaik 2024: Fotografi Canggih dalam Genggaman",
+            "summary": "cachedResponse.get().summary",
+            "brand": "",
+            "reason": "cachedResponse.get().reason",
+            "link": "https://www.tokopedia.com/blog/top-hp-kamera-terbaik-tek/"
+        }
+    ]
+}
+```
