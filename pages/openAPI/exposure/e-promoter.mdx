@@ -1,0 +1,81 @@
+# E-Promoter / Chatbot
+
+E-Promoter / Chatbot 데이터를 가져오기 위한 API입니다.
+
+
+## Authentication
+
+API에 접근하기 위해 API Key가 필합니다. 예시:
+
+```bash
+curl -X GET https://app-api.commerceos.ai/open/v1/exposures/e-promoter \
+     -H "x-api-key: YOUR_API_KEY"
+```
+
+## Endpoints
+
+### Get User
+
+**Endpoint**: `GET /open/v1/exposures/e-promoter`  
+
+#### Request
+
+| Field                   | Type    | Required | Description                         |
+|-------------------------|---------|----------|-------------------------------------|
+| `x-api-key` (Header)    | string  | Yes      | 사용자별 API Key.   |
+| `startDate` (Body)      | LocalDate  | Yes   | 검색할 Posting의 시작 날짜입니다.              |
+| `endDate` (Body)        | LocalDate  | Yes   | 검색할 Posting의 마지막 날짜입니다.             |
+
+#### Example Request
+
+```bash
+curl -X GET https://app-api.commerceos.ai/open/v1/exposures/social-posting?startDate=2024-01-01&endDate=2024-11-27 \
+     -H "x-api-key: YOUR_API_KEY"
+```
+
+#### Response
+
+| Field      | Type       | Required | Description                                           |
+|------------|------------|----------|----------------------------------------------|
+| `startDate` | LocalDateTime  | Yes      | 조회 기간의 시작 날짜입니다. ISO 8601 형식(`YYYY-MM-DD`)으로 제공됩니다. |
+| `endDate`   | LocalDateTime  | Yes      | 조회 기간의 종료 날짜입니다. ISO 8601 형식(`YYYY-MM-DD`)으로 제공됩니다. |
+| `result`    | array `EPromoterPostingResult`    | Yes      | `EPromoterPostingResult` 객체의 배열입니다.                            |
+
+
+- **EPromoterPostingResult**
+
+| Field         | Type       | Required | Description                                                                                       |
+|-------------------|------------|----------|------------------------------------------------------------------------------------------|
+| `id`             | number     | Yes      | 고유 ID입니다.                                                                            |
+| `collectTime`    | string     | Yes      | 데이터를 수집한 날짜와 시간입니다. ISO 8601 형식으로 제공됩니다.                              |
+| `platform`    | string     | Yes      | 수집을 진행한 Platform입니다. (ex. att).                                                   |
+| `question`    | string     | Yes      | E-Promoter / Chatbot에 입력한 질문입니다.                                                  |
+| `answer`    | string     | Yes      | 질문에 대한 답변입니다.                                                   |
+| `changed`    | boolean     | Yes      | 현재답변이 직전 답변과 변경되었는지를 의미합니다.                                                   |
+| `previousAnswerSummery`    | string     | Yes      | 직전 질문에 대한 요약입니다.                                                  |
+| `currentAnswerSummary`    | string     | Yes      | 현재 질문에 대한 요약입니다.                                                  |
+| `changedSummary`    | string     | Yes      | 현재 요약과 직전 요약의 변경점에 대한 요약입니다.                                                   |
+
+
+- **Status**: 200 OK
+- **Body**:
+
+```json
+{
+    "startDate": "2024-11-11",
+    "endDate": "2024-12-12",
+    "result": [
+        {
+            "id": 21704915252412416,
+            "collectTime": "2024-11-11T06:22:51",
+            "platform": "att",
+            "question": "What is the latest Samsung Phone?",
+            "answer": "Looking for the latest and greatest phone, but not sure which one’s right for you? Here are a couple ways to check the specs: Compare devices when you shop for a new phone. Check the box at the bottom of the device you want to know more about, then select Compare at the bottom of the screen. You’ll see a side-by-side list of features. Get details on the device you want to know more about. You can search on your own or choose from popular brands.",
+            "changed": false,
+            "previousAnswerSummery": "The response provides general guidance on how to compare phone specifications and features through Samsung's shopping interface, suggesting users can compare devices side-by-side and search for specific models.",
+            "currentAnswerSummary": "The response focuses on navigation instructions for comparing phones on Samsung's website, including using the compare feature and searching for specific devices.",
+            "changedSummary": "No significant changes in content - this appears to be the same response shown twice, focusing on how to navigate Samsung's website to compare phones rather than providing specific model recommendations."
+        }
+    ]
+}
+```
