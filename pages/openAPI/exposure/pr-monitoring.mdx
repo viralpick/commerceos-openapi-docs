@@ -61,6 +61,9 @@ curl -X GET https://app-api.commerceos.ai/open/v1/exposures/pr-monitoring?startD
 | `category`          | string     | No      |   게시물에서 언급된 제품 의 카테고리입니다.                                                      |
 | `link`      | string     | Yes      | 게시글의 Link Url입니다.                                                                           |
 | `headerImageUrl`         | string     | No      | PR 페이지의 Header Image (배너) 링크입니다.                                             |
+| `detail_content`         | string     | No      | PR 페이지 링크의 디테일 Content 입니다. (TBD)                                      |
+| `screenshot`         | string     | No      | PR 페이지의 디테일의 screenshot 입니다. (TBD)                                         |
+| `a_tag_links`         | string     | No      | PR 페이지의 내에 존재하는 a tag link 리스트입니다. (TBD)                                     |
 
 
 - **Status**: 200 OK
@@ -71,7 +74,7 @@ curl -X GET https://app-api.commerceos.ai/open/v1/exposures/pr-monitoring?startD
     "startDate": "2024-04-04",
     "endDate": "2024-04-04",
     "result": [
-        {
+          {
             "id": 26761645439057925,
             "collectTime": "2024-11-25T04:50:05",
             "prArticleId": "7000960e6f958c402510112602e26c6cbec7d4edd2937682f239e964a62d4b8c",
@@ -83,34 +86,11 @@ curl -X GET https://app-api.commerceos.ai/open/v1/exposures/pr-monitoring?startD
             "reason": "The text mentions AT&T, which is not one of the specified brands (Samsung, Apple, Google).",
             "category": "Other",
             "link": "https://about.att.com/story/2024/digital-divide-recommitment.html",
-            "headerImageUrl": "https://kurve-imgs.s3.ap-northeast-2.amazonaws.com/samsung/pr/2024/11/25/04/att/PC/images/headerImage1.png"
-        },
-        {
-            "id": 25726856212774929,
-            "collectTime": "2024-11-08T12:19:45",
-            "prArticleId": "527cfd16134472b8ce1a6258975a321a062063425d9c1020d3913582dc0520ec",
-            "publishedAt": "2024-04-04T00:00:00",
-            "title": "",
-            "content": "T-Mobile Gives New 5G Internet Customers Free Blink Home Security Cameras This Moving Season",
-            "summary": "T-Mobile offers free Blink Home Security Cameras to new 5G internet customers.",
-            "brand": "other",
-            "reason": "The text does not mention any specific cell phone brand like Samsung, Apple, or Google. It only mentions T-Mobile, which is a telecommunications company, not a cell phone brand.",
-            "category": "Other",
-            "link": "https://www.t-mobile.com/news/offers/5g-internet-free-blink-smart-home-package",
-            "headerImageUrl": "https://kurve-imgs.s3.ap-northeast-2.amazonaws.com/samsung/pr/2024/11/08/12/t-mobile/PC/images/headerImage1.png"
-        },
-        {
-            "id": 27512227003105280,
-            "collectTime": "2024-11-26T13:28:15",
-            "prArticleId": "c5b838af9c9e39367acbc79c087ed0f62d3e907e17456a862278b3f2134d658d",
-            "publishedAt": "2024-04-04T00:00:00",
-            "title": "11 HP Kamera Terbaik 2024: Fotografi Canggih dalam Genggaman",
-            "content": "11 HP Kamera Terbaik 2024: Fotografi Canggih dalam Genggaman",
-            "summary": "cachedResponse.get().summary",
-            "brand": "",
-            "reason": "cachedResponse.get().reason",
-            "link": "https://www.tokopedia.com/blog/top-hp-kamera-terbaik-tek/"
-        }
+            "headerImageUrl": "https://kurve-imgs.s3.ap-northeast-2.amazonaws.com/samsung/pr/2024/11/25/04/att/PC/images/headerImage1.png",
+            "detail_content": "Die Vorfreude auf die UEFA EURO 2024™ ist riesig, Millionen von Menschen fiebern der ersten Partie zwischen Gastgeber Deutschland und Schottland am Freitagabend entgegen. Die volle Packung Fußballunterhaltung bekommen Fans bei MagentaTV, denn hier können sie alle 51 Spiele in bester UHD-Qualität genießen. Und wer nach den nervenaufreibenden Spieltagen gern noch eine Extraportion humorvoller EURO-Unterhaltung möchte, kann bei MagentaTV direkt am Ball bleiben. Im Anschluss an die erste Partie feiert dort die neue Late Show „Studio Pille-Palle" mit Schauspieler Fahri Yardim und dem 43-fachen Nationalspieler Jonas Hector gegen 23:30 Uhr seine Premiere. Insgesamt sind zehn Shows an ausgewählten Spieltagen vorgesehen.",
+            "screenshot": "https://collected-data.commerceos.ai/samsung/pr_detail/2024/12/15/15/deutsch_telekom/PC/a8180d221a14c1405c53844232c5d7082ee0a861d583134b8635b1e59910213f/images/screenshot.png",
+            "a_tag_links": ["https://www.telekom.de/hilfe/hilfe-bei-stoerungen/serviceassistent?context=Willkommen", "https://www.telekom.de/kontakt"],
+      }
     ]
 }
 ```
