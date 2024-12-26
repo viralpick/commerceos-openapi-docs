@@ -1,0 +1,69 @@
+# Content Scoring
+
+Content Scoring 데이터를 가져오기 위한 API입니다.
+
+
+## Authentication
+
+API에 접근하기 위해 API Key가 필합니다. 예시:
+
+```bash
+curl -X GET https://app-api.commerceos.ai/open/v1/pxm/content-scoring \
+     -H "x-api-key: YOUR_API_KEY"
+```
+
+## Endpoints
+
+### Get User
+
+**Endpoint**: `GET /open/v1/pxm/content-scoring`  
+
+#### Request
+
+| Field                   | Type    | Required | Description                         |
+|-------------------------|---------|----------|-------------------------------------|
+| `x-api-key` (Header)    | string  | Yes      | 사용자별 API Key.   |
+| `startDate` (Body)      | LocalDate  | Yes   | 검색할 Posting의 시작 날짜입니다.              |
+| `endDate` (Body)        | LocalDate  | Yes   | 검색할 Posting의 마지막 날짜입니다.             |
+
+#### Example Request
+
+```bash
+curl -X GET https://app-api.commerceos.ai/open/v1/pxm/content-scoring?startDate=2024-01-01&endDate=2024-11-27 \
+     -H "x-api-key: YOUR_API_KEY"
+```
+
+#### Response
+
+| Field      | Type       | Required | Description                                           |
+|------------|------------|----------|----------------------------------------------|
+| `startDate` | LocalDateTime  | Yes      | 조회 기간의 시작 날짜입니다. ISO 8601 형식(`YYYY-MM-DD`)으로 제공됩니다. |
+| `endDate`   | LocalDateTime  | Yes      | 조회 기간의 종료 날짜입니다. ISO 8601 형식(`YYYY-MM-DD`)으로 제공됩니다. |
+| `result`    | array `ContentScoringResult`    | Yes      | `ContentScoringResult` 객체의 배열입니다.                            |
+
+
+- **ContentScoringResult**
+
+| Field              | Type       | Required | Description                                                             |
+|--------------------|------------|----------|-------------------------------------------------------------------------|
+| `id`               | number     | Yes      | 고유 ID입니다.                                                             |
+| `collectTime`      | string     | Yes      | 데이터를 수집한 날짜와 시간입니다. ISO 8601 형식으로 제공됩니다.                     |
+| `series`           | string     | Yes      | Content Scoring에 사용된 데이터 타입입니다.                                    |
+| `platform`         | string     | Yes      | 원본 데이터의 플랫폼 이름입니다.                                                |
+| `alias`            | string     | Yes      | 원본 데이터의 플랫폼의 alias 입니다. (ex. retailer_id)                         |
+| `region`           | string     | Yes      | 게시물이 작성된 지역입니다. 예: `N.Am`.                                        |
+| `country`          | string     | Yes      | 게시물이 작성된 국가입니다.                                                   |
+| `code`             | string     | Yes      | Scoring Check List의 Code입니다.                                          |
+| `pass`             | boolean    | Yes      | Check List의 Pass 여부입니다.                                              |
+| `reason`           | string     | Yes      | pass의 판별 이유입니다.                                                     |
+| `reasonSource`     | string     | Yes      | Check List를 판별하기 위해 사용한 데이터입니다.                                 |
+| `reasonSourceType` | string     | Yes      | reasonSource의 Type입니다. (imageUrl, imageUrls, text)                    | 
+
+
+- **Status**: 200 OK
+- **Body**:
+
+```json
+{
+}
+```
