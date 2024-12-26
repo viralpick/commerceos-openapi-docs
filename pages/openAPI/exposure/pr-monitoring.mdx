@@ -66,7 +66,10 @@ curl -X GET https://app-api.commerceos.ai/open/v1/exposures/pr-monitoring?startD
 | `atagLinks`         | string     | No      | PR 페이지의 내에 존재하는 a tag link 리스트입니다.(Deprecated 삭제 예정)                           |
 | `aTags`         | array `ATag`    | yes      | PR 페이지의 내에 존재하는 a tag 리스트입니다.                                         |
 
-- **ATag**
+
+- **ATag**  
+
+
 | Field      | Type       | Required | Description                                           |
 |------------|------------|----------|----------------------------------------------|
 | `title` | string  | Yes      | A Tag 내에 제공하는 Text입니다. |
@@ -109,6 +112,44 @@ curl -X GET https://app-api.commerceos.ai/open/v1/exposures/pr-monitoring?startD
                 "https://about.att.com/",
                 "https://investors.att.com/",
                 "https://about.att.com/pages/digital-divide"
+            ],
+            "atags": [
+                {
+                    "title": "Subscribe to AT&T News",
+                    "url": "https://about.att.com/pages/subscribe-att-news"
+                },
+                {
+                    "title": "FCC Underestimates Americans Unserved by Broadband Internet by 50% - BroadbandNow.com",
+                    "url": "https://broadbandnow.com/research/fcc-underestimates-unserved-by-50-percent"
+                },
+                {
+                    "title": "https://connectednation.org/press-releases/bridging-the-digital-divide-on-tribal-lands",
+                    "url": "https://connectednation.org/press-releases/bridging-the-digital-divide-on-tribal-lands"
+                },
+                {
+                    "title": "https://about.bgov.com/news/native-americans-long-left-out-from-broadband-push-for-equity/#:~:text=As%20a%20group%2C%20Native%20Americans,people%20in%20non%2Dtribal%20areas",
+                    "url": "https://about.bgov.com/news/native-americans-long-left-out-from-broadband-push-for-equity/#:~:text=As%20a%20group%2C%20Native%20Americans,people%20in%20non%2Dtribal%20areas"
+                },
+                {
+                    "title": "https://www.att.com/ecms/dam/att/consumer/upperfunnel/2018/pdf/International-Travel-Guide.pdf",
+                    "url": "https://www.att.com/ecms/dam/att/consumer/upperfunnel/2018/pdf/International-Travel-Guide.pdf"
+                },
+                {
+                    "title": "NYSE:T",
+                    "url": "https://investors.att.com/"
+                },
+                {
+                    "title": "about.att.com",
+                    "url": "https://about.att.com/"
+                },
+                {
+                    "title": "investors.att.com",
+                    "url": "https://investors.att.com/"
+                },
+                {
+                    "title": "Digital Divide",
+                    "url": "https://about.att.com/pages/digital-divide"
+                }
             ]
         }
     ]
