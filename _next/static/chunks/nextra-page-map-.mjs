@@ -29,5 +29,15 @@ export const pageMap = [{
         "sidebarTitle": "Social Posting"
       }
     }]
+  }, {
+    name: "pxm",
+    route: "/openAPI/pxm",
+    children: [{
+      name: "content-scoring",
+      route: "/openAPI/pxm/content-scoring",
+      frontMatter: {
+        "sidebarTitle": "Content Scoring"
+      }
+    }]
   }]
 }];
