@@ -61,9 +61,16 @@ curl -X GET https://app-api.commerceos.ai/open/v1/exposures/pr-monitoring?startD
 | `category`          | string     | No      |   게시물에서 언급된 제품 의 카테고리입니다.                                                      |
 | `link`      | string     | Yes      | 게시글의 Link Url입니다.                                                                           |
 | `headerImageUrl`         | string     | No      | PR 페이지의 Header Image (배너) 링크입니다.                                             |
-| `detail_content`         | string     | No      | PR 페이지 링크의 디테일 Content 입니다. (TBD)                                      |
-| `screenshot`         | string     | No      | PR 페이지의 디테일의 screenshot 입니다. (TBD)                                         |
-| `atagLinks`         | string     | No      | PR 페이지의 내에 존재하는 a tag link 리스트입니다. (TBD)                                     |
+| `detail_content`         | string     | No      | PR 페이지 링크의 디테일 Content 입니다.                                            |
+| `screenshot`         | string     | No      | PR 페이지의 디테일의 screenshot 입니다.                                              |
+| `atagLinks`         | string     | No      | PR 페이지의 내에 존재하는 a tag link 리스트입니다.(Deprecated 삭제 예정)                           |
+| `aTags`         | array `ATag`    | yes      | PR 페이지의 내에 존재하는 a tag 리스트입니다.                                         |
+
+- **ATag**
+| Field      | Type       | Required | Description                                           |
+|------------|------------|----------|----------------------------------------------|
+| `title` | string  | Yes      | A Tag 내에 제공하는 Text입니다. |
+| `url`   | string  | Yes      | A Tag 에서 제공하는 URL입니다.  |
 
 
 - **Status**: 200 OK
