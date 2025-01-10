@@ -33,6 +33,12 @@ export const pageMap = [{
     name: "pxm",
     route: "/openAPI/pxm",
     children: [{
+      name: "content-scoring - v2.1",
+      route: "/openAPI/pxm/content-scoring - v2.1",
+      frontMatter: {
+        "sidebarTitle": "Content Scoring   V2.1"
+      }
+    }, {
       name: "content-scoring",
       route: "/openAPI/pxm/content-scoring",
       frontMatter: {
