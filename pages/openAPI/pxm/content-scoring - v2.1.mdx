@@ -47,19 +47,19 @@ curl -X GET https://app-api.commerceos.ai/open/v1/pxm/v2.1/content-scoring?start
 | Field              | Type       | Required | Description                                                             |
 |--------------------|------------|----------|-------------------------------------------------------------------------|
 | `id`               | number     | Yes      | 고유 ID입니다.                                                             |
-| `collectTime`      | string     | Yes      | 데이터를 수집한 날짜와 시간입니다. ISO 8601 형식으로 제공됩니다.                     |
-| `category`           | string     | Yes      | Content Scoring에 사용된 데이터 타입입니다.                                    |
+| `collectedAt`      | string     | Yes      | 데이터를 수집한 날짜와 시간입니다. 각 지역별 LocalTimed으로, ISO 8601 형식으로 제공됩니다.                     |
+| `category`         | string     | Yes      | Content Scoring에 사용된 데이터 타입입니다.                                    |
 | `platform`         | string     | Yes      | 원본 데이터의 플랫폼 이름입니다.                                                |
 | `alias`            | string     | Yes      | 원본 데이터의 플랫폼의 alias 입니다. (ex. retailer_id)                         |
 | `region`           | string     | Yes      | 게시물이 작성된 지역입니다. 예: `N.Am`.                                        |
 | `country`          | string     | Yes      | 게시물이 작성된 국가입니다.                                                   |
-| `device`          | string     | Yes       | 데이터가 수집된 device환경입니다.                                               |
+| `device`           | string     | Yes       | 데이터가 수집된 device환경입니다.                                               |
 | `code`             | string     | Yes      | Scoring Check List의 Code입니다.                                          |
 | `pass`             | boolean    | No      | Check List의 Pass 여부입니다. (if null. N/A)                                   |
 | `reason`           | string     | Yes      | pass의 판별 이유입니다.                                                     |
 | `reasonSource`     | string     | Yes      | Check List를 판별하기 위해 사용한 데이터입니다.                                 |
 | `reasonSourceType` | string     | Yes      | reasonSource의 Type입니다. (imageUrl, imageUrls, text)                    | 
-| `screenshot` | string     | Yes      |    category 별 페이지의 Screenshot입니다.              | 
+| `screenshot`       | string     | Yes      |    category 별 페이지의 Screenshot입니다.              | 
 
 - **Status**: 200 OK
 - **Body**:
