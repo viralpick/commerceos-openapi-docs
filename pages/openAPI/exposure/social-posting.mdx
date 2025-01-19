@@ -25,6 +25,7 @@ curl -X GET https://app-api.commerceos.ai/open/v1/exposures/social-posting \
 | `x-api-key` (Header)    | string  | Yes      | 사용자별 API Key.   |
 | `startDate` (Body)      | LocalDate  | Yes   | 검색할 Posting의 시작 날짜입니다.              |
 | `endDate` (Body)        | LocalDate  | Yes   | 검색할 Posting의 마지막 날짜입니다.             |
+| `dateType` (Body)       | string  | No   | enum(CollectedAt, PostedAt) 검색 기준을 설정합니다. (Default. PostedAt)  |
 
 #### Example Request
 
