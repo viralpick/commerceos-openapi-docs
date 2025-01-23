@@ -23,6 +23,12 @@ export const pageMap = [{
         "sidebarTitle": "Pr Monitoring"
       }
     }, {
+      name: "search-share",
+      route: "/openAPI/exposure/search-share",
+      frontMatter: {
+        "sidebarTitle": "Search Share"
+      }
+    }, {
       name: "social-posting",
       route: "/openAPI/exposure/social-posting",
       frontMatter: {
