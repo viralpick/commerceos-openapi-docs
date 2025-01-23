@@ -48,9 +48,8 @@ curl -X GET https://app-api.commerceos.ai/open/v1/exposures/social-posting?start
 | Field         | Type       | Required | Description                                                                                       |
 |-------------------|------------|----------|------------------------------------------------------------------------------------------|
 | `id`             | number     | Yes      | 고유 ID입니다.                                                                            |
-| `postDate`       | string     | Yes      | 게시물이 작성된 날짜와 시간입니다. ISO 8601 형식 (`YYYY-MM-DDTHH:mm:ss`)으로 제공됩니다.      |
+| `postDate`       | string     | Yes      | 게시물이 작성된 날짜와 시간입니다. ISO 8601 형식 (`YYYY-MM-DDTHH:mm:ss+zoneoffset`)으로 제공됩니다.    |
 | `collectTime`    | string     | Yes      | 데이터를 수집한 날짜와 시간입니다. ISO 8601 형식으로 제공됩니다.                              |
-| `collectedAt`    | string     | Yes      | 데이터를 수집한 날짜와 시간입니다. 각 지역별 LocalTimed으로, ISO 8601 형식으로 제공됩니다.        |
 | `shareLink`      | string     | Yes      | 게시물에 대한 공유 링크입니다.                                                             |
 | `platform`       | string     | Yes      | 게시물이 게시된 플랫폼입니다. 예: `x`.                                                     |
 | `platformArticleId`    | string   | Yes    | 각 플랫폼별 식별 번호 (Facebook은 공개된 고유 식별자가 없어, Content의 Hash로 구성됩니다.)       |
