@@ -61,6 +61,41 @@ curl -X GET https://app-api.commerceos.ai/open/v1/pxm/v2.1/content-scoring?start
 | `reasonSourceType` | string     | Yes      | reasonSource의 Type입니다. (imageUrl, imageUrls, text)                    | 
 | `screenshot`       | string     | Yes      |    category 별 페이지의 Screenshot입니다.              | 
 
+
+### ReasonSource Json Type
+
+- **IncludeKeywordInTitle**
+
+| Field              | Type       | Required | Description                                                             |
+|--------------------|------------|----------|-------------------------------------------------------------------------|
+| `title`            | number     | Yes      | PDP Product Title로 SEO 대상입니다.                              |
+| `includeTitleKeywords`      | string     | Yes      | 타겟으로 하는 SEO 키워드 중 title내 포함 키워드입니다.                 |
+| `pass`         | string     | Yes      |  includeTitleKeywords 존재 여부에 따라 Pass 여부를 제공합니다.              |
+
+- **Array[IncludeKeywordInImageName]**
+
+| Field              | Type       | Required | Description                                                             |
+|--------------------|------------|----------|-------------------------------------------------------------------------|
+| `url`            | number     | Yes      | PDP 페이지에 존재하는 제품 역영에 해당하는 모든 이미지의 URL입니다.                              |
+| `includeUrlKeywords`      | string     | Yes      | 타겟으로 하는 SEO 키워드 중 URL내 포함 키워드입니다.                 |
+| `pass`         | string     | Yes      |  includeUrlKeywords 존재 여부에 따라 Pass 여부를 제공합니다.              |
+
+- **Array[IncludeKeywordInImageAlt]**
+
+| Field              | Type       | Required | Description                                                             |
+|--------------------|------------|----------|-------------------------------------------------------------------------|
+| `alt`            | number     | Yes      | PDP 페이지에 존재하는 제품 역영에 해당하는 모든 이미지의 Alt 입니다.                             |
+| `includeAltKeywords`      | string     | Yes      | 타겟으로 하는 SEO 키워드 중 Alt 내 포함 키워드입니다.                 |
+| `pass`         | string     | Yes      |  includeAltKeywords 존재 여부에 따라 Pass 여부를 제공합니다.              |
+
+- **IncludeKeywordInContentTexts**
+
+| Field              | Type       | Required | Description                                                             |
+|--------------------|------------|----------|-------------------------------------------------------------------------|
+| `contentText`            | number     | Yes      | PDP 전체 Contents로 SEO 대상입니다.                              |
+| `includeKeywords`      | string     | Yes      | 타겟으로 하는 SEO 키워드 중 title내 포함 키워드입니다.                 |
+
+
 - **Status**: 200 OK
 - **Body**:
 
