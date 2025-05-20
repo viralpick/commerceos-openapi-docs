@@ -1,0 +1,65 @@
+# Get Sources API
+
+이 문서는 특정 회사에 연결된 소스 데이터를 확인하기 위한 `getSources` API에 대한 설명을 제공합니다.
+
+## 인증
+
+API에 접근하기 위해서는 API Key가 필요합니다. 다음은 예시입니다:
+
+```bash
+curl -X GET https://app-api-v2.commerceos.ai/open/v1/sources \
+     -H "x-api-key: YOUR_API_KEY"
+```
+
+## 엔드포인트
+
+### 소스 데이터 가져오기
+
+**엔드포인트**: `GET /open/v1/sources`
+
+#### 요청
+
+| 필드                   | 타입    | 필수 여부 | 설명                         |
+|-------------------------|---------|----------|-------------------------------------|
+| `x-api-key` (헤더)    | string  | 예      | 사용자별 API Key.   |
+
+#### 예시 요청
+
+```bash
+curl -X GET https://app-api-v2.commerceos.ai/open/v1/sources \
+     -H "x-api-key: YOUR_API_KEY"
+```
+
+#### 응답
+
+| 필드      | 타입       | 필수 여부 | 설명                                           |
+|------------|------------|----------|----------------------------------------------|
+| `meta`    | meta    | 예      | API에 대한 결과와 응답 메시지를 담고 있습니다.                            |
+| `data`    | array `Source`    | 예      | `Source` 객체의 배열입니다.                            |
+
+- **Source**
+
+| 필드         | 타입       | 필수 여부 | 설명                                                                                       |
+|-------------------|------------|----------|------------------------------------------------------------------------------------------|
+| `id`             | string     | 예      | 소스의 고유 ID입니다.                                                                            |
+| `name`    | string     | 예      | 소스의 이름입니다.                              |
+| `description`      | string     | 예      | 소스에 대한 설명을 담고 있습니다.                   |
+
+- **Status**: 200 OK
+- **Body**:
+
+```json
+{
+    "meta": {
+        "code": "Success",
+        "message": "ok"
+    },
+    "data": [
+        {
+            "id": "90664398690975744",
+            "name": "review_rating_category_summary",
+            "description": "Review Rating 1차 분석 결과"
+        }
+    ]
+}
+```
