@@ -44,6 +44,17 @@ curl -X GET https://app-api-v2.commerceos.ai/open/v1/sources \
 | `id`             | string     | 예      | 소스의 고유 ID입니다.                                                                            |
 | `name`    | string     | 예      | 소스의 이름입니다.                              |
 | `description`      | string     | 예      | 소스에 대한 설명을 담고 있습니다.                   |
+| `structure`      | `FieldObject`      | 예      | 소스가 지원하는 Data Structure구조를 설명합니다.                   |
+
+- **FieldObject**
+
+| 필드         | 타입       | 필수 여부 | 설명                                                                                       |
+|-------------------|------------|----------|------------------------------------------------------------------------------------------|
+| `type`             | string     | 예      | Field의 타입을 의미합니다. ex. String, Number, Boolean, Array, Object    |
+| `required`    | string     | 예      | 소스의 이름입니다.                              |
+| `arrayField`      |  `FieldObject`     | 아니요      | type이 Array일때 해당 값의 Data Structure구조를 설명합니다.                  |
+| `objectField`      | `map(FieldObject)`   | 아니요      | type이 Object일때 해당 값의 Data Structure구조를 설명합니다.                   |
+
 
 - **Status**: 200 OK
 - **Body**:
