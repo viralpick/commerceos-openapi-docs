@@ -51,5 +51,21 @@ export const pageMap = [{
         "sidebarTitle": "Content Scoring"
       }
     }]
+  }, {
+    name: "v2-source",
+    route: "/openAPI/v2-source",
+    children: [{
+      name: "get-source-rows",
+      route: "/openAPI/v2-source/get-source-rows",
+      frontMatter: {
+        "sidebarTitle": "Get Source Rows"
+      }
+    }, {
+      name: "get-sources",
+      route: "/openAPI/v2-source/get-sources",
+      frontMatter: {
+        "sidebarTitle": "Get Sources"
+      }
+    }]
   }]
 }];
