@@ -37,4 +37,7 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
+# pagefind
+_pagefind/
+
 # End of https://www.toptal.com/developers/gitignore/api/nextjs
