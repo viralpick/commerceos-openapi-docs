@@ -21,8 +21,8 @@ export default async function RootLayout({ children }) {
                 <Layout
                     navbar={<Navbar logo={<Image src={logo} alt="Commerce OS" height={64} />} />}
                     pageMap={await getPageMap()}
-                    docsRepositoryBase="https://github.com"
                     darkMode={false}
+                    editLink={null}
                 >
                     {children}
                 </Layout>
