@@ -1,6 +1,6 @@
 export default {
     index: 'Getting Started',
     ontology: 'Ontology',
-    agent: 'Agent',
-    'open-api-legacy': 'Open API (Legacy)'
+    'open-api': 'Open API',
+    'open-api-legacy': 'Open API (Deprecated)'
 }
