@@ -1,0 +1,68 @@
+# Work 실행
+
+Agent를 통해 Work를 실행하기 위한 API입니다.
+
+## Authentication
+
+API에 접근하기 위해 API Key가 필요합니다. 예시:
+
+```bash
+curl -X POST https://app-api-v2.commerceos.ai/open/v1/works/{workKey}/run \
+     -H "Authorization: Bearer YOUR_API_KEY" \
+     -H "Content-Type: application/json"
+```
+
+## Endpoints
+
+### Run Work
+
+**Endpoint**: `POST /open/v1/works/{workKey}/run`
+
+#### Request
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `Authorization` (Header) | string | Yes | Bearer 토큰 형식의 API Key. `Bearer {API_KEY}` |
+| `X-Tenant-ID` (Header) | string | No | 멀티 테넌시를 위한 Tenant ID. |
+| `workKey` (Path) | string | Yes | 실행할 Work의 고유 ID. |
+| `followQuestion` (Body) | string | Yes | Work에 전달할 질문 또는 명령어. |
+| `input` (Body) | object | No | Work 실행에 필요한 추가 입력값. Key-Value 형태의 객체. |
+
+#### Example Request
+
+```bash
+curl -X POST https://app-api-v2.commerceos.ai/open/v1/works/your-work-key/run \
+     -H "Authorization: Bearer YOUR_API_KEY" \
+     -H "Content-Type: application/json" \
+     -d '{
+       "followQuestion": "최신 트렌드를 분석해주세요",
+       "input": {
+         "category": "tech",
+         "limit": 10
+       }
+     }'
+```
+
+#### Response
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `meta` | object | Yes | 응답 메타 정보. |
+| `meta.code` | string | Yes | 응답 코드. 성공 시 `Success`. |
+| `meta.message` | string | Yes | 응답 메시지. |
+| `data` | any | Yes | Work 실행 결과 데이터. Work의 종류에 따라 반환되는 데이터 구조가 달라집니다. |
+
+- **Status**: 200 OK
+- **Body**:
+
+```json
+{
+  "meta": {
+    "code": "Success",
+    "message": "string"
+  },
+  "data": {}
+}
+```
+
+> **참고**: `data` 필드는 실행하는 Work의 종류에 따라 다른 구조의 데이터를 반환합니다. 각 Work에 맞는 응답 형식은 해당 Work의 설정을 참고하세요.
