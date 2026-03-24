@@ -1,6 +1,6 @@
 # Getting started with COS
 
-COS(Commerce Operating System) 플랫폼은 데이터를 활용해 실제 비즈니스 문제를 해결할 수 있도록 설계되었습니다. COS 플랫폼은 다음과 같은 조직과 사용자가 활용합니다:
+COS(Commerce Operating System) 플랫폼은 고객사의 데이터를 **도메인 지식으로 구조화**하고, 이를 기반으로 **도메인에 특화된 전문 Agent**를 빌딩하여 실제 비즈니스 문제를 해결할 수 있도록 설계되었습니다. COS 플랫폼은 다음과 같은 조직과 사용자가 활용합니다:
 
 - **다양한 조직**: 이커머스 기업, 브랜드사, 유통사, 마켓플레이스 운영사
 - **다양한 사용자**: 데이터 엔지니어, 데이터 분석가, MD, 마케터, 운영 담당자
@@ -22,9 +22,9 @@ COS 플랫폼을 시작할 준비가 되었다면:
 
 | 문서 | 내용 |
 |------|------|
-| **Platform Overview** | COS의 4가지 핵심 모듈(Pipeline Builder, Ontology, Workflow Builder, View Generator) 소개 |
+| **Platform Overview** | COS의 4가지 핵심 모듈(Data Flow, Ontology, Agent Builder, View Generator) 소개 |
 | **Ontology Concepts** | Object, Link, Knowledge Dictionary의 개념과 Annotation 작성 기준 |
-| **Workflow Builder** | 노드 구성, Agent 입력 소스, 데이터 전달 방식 |
+| **Agent Builder** | 노드 구성, Agent 입력 소스, 데이터 전달 방식 |
 | **Open API Reference** | 데이터 접근 및 관리를 위한 API 문서 |
 
 ---
@@ -35,12 +35,12 @@ COS는 데이터, 지식, 실행을 하나의 흐름으로 연결하는 **Agent 
 
 | 모듈 | 역할 |
 |------|------|
-| **Pipeline Builder** | DB, API, 파일을 연결하고 전처리/정규화 후 온톨로지 DB로 적재 |
-| [**Ontology**](ontology) | 데이터에 의미와 관계를 부여해 AI가 이해할 수 있도록 구조화 |
-| **Workflow Builder** | 멀티 에이전트 기반 워크플로우 구성 및 실행 |
+| **Data Flow** | DB, API, 파일을 연결하고 전처리/정규화 후 온톨로지 DB로 적재 |
+| [**Ontology**](ontology) | 데이터에 의미와 관계를 부여하여 Agent의 도메인 지식과 메모리를 구축 |
+| **Agent Builder** | 도메인 지식 기반의 멀티 에이전트 워크플로우 구성 및 실행 |
 | **View Generator** | 온톨로지 기반 대시보드 자동 생성 |
 
-> 데이터 연결부터 액션까지, 모든 과정을 **COS** 하나의 플랫폼에서 해결
+> 데이터 연결부터 도메인 지식 구축, 전문 Agent 빌딩, 액션까지 — 모든 과정을 **COS** 하나의 플랫폼에서 해결
 
 ---
 
