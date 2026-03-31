@@ -5,4 +5,5 @@ export default {
   "open-api": "Open API",
   "open-api-legacy": "Open API (Deprecated)",
   "ontology-management": "Ontology Management",
+  pipeline: "Pipeline",
 };
