@@ -1,3 +1,5 @@
+import { Callout } from 'nextra/components'
+
 ## Load Nodes
 
 Load 단계는 Transform 단계를 거쳐 가공된 데이터를 **최종 저장소에 적재**하고,  
@@ -8,7 +10,7 @@ Load 단계는 Transform 단계를 거쳐 가공된 데이터를 **최종 저장
 
 ---
 
-### Mongo Upsert
+### Upsert Mongo
 
 - 가공된 데이터를 MongoDB에 **저장(Insert) 또는 갱신(Update)** 하는 노드
 
@@ -16,6 +18,11 @@ Load 단계는 Transform 단계를 거쳐 가공된 데이터를 **최종 저장
 
 - **Collection**  
   실제 데이터가 저장되는 단위 (테이블과 유사한 개념)
+
+<Callout type="warning">
+  **Collection 이름은 이후 연결되는 Create Ontology 노드의 Ontology Name과 반드시 일치해야 합니다.**  
+  이름이 다를 경우 온톨로지 생성이 정상적으로 동작하지 않습니다.
+</Callout>
 
 - **Filter Fields**  
   데이터의 중복 여부를 판단하기 위한 기준 필드
@@ -38,6 +45,11 @@ Load 단계는 Transform 단계를 거쳐 가공된 데이터를 **최종 저장
 - **Ontology Name**  
   생성할 온톨로지의 이름
 
+<Callout type="warning">
+  **Ontology Name은 선행 Upsert Mongo 노드의 Collection 이름과 반드시 일치해야 합니다.**  
+  이름이 다를 경우 MongoDB에 적재된 데이터를 기반으로 온톨로지를 생성할 수 없습니다.
+</Callout>
+
 #### 특징
 
 - 데이터 자체가 아닌, 데이터에 대한 **의미 정보(Semantic Layer)**를 생성한다
@@ -50,5 +62,5 @@ Load 단계는 Transform 단계를 거쳐 가공된 데이터를 **최종 저장
 온톨로지 생성을 위해서는 반드시 다음 순서를 따라야 한다.
 
 ```text
-Mongo Upsert → Create Ontology
+Upsert Mongo → Create Ontology
 ```
