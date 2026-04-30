@@ -8,8 +8,8 @@ import "nextra-theme-docs/style.css";
 
 export const metadata = {
   title: {
-    default: "Commerce OS Open API",
-    template: "%s | Commerce OS",
+    default: "AgentOS Open API",
+    template: "%s | AgentOS",
   },
 };
 
@@ -20,7 +20,7 @@ export default async function RootLayout({ children }) {
       <body>
         <Layout
           navbar={
-            <Navbar logo={<Image src={logo} alt="Commerce OS" height={64} />} />
+            <Navbar logo={<Image src={logo} alt="AgentOS" height={64} />} />
           }
           pageMap={await getPageMap()}
           editLink={null}
