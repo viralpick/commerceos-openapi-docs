@@ -1,0 +1,53 @@
+# 공통 사항
+
+Open API(`/open/v1/**`)를 호출할 때 공통적으로 적용되는 사항입니다.
+
+---
+
+## Base URL
+
+```
+https://[your-base-url]
+```
+
+## 인증
+
+Open API(`/open/v1/**`)는 헤더 `x-api-key`로 인증합니다.
+
+```
+x-api-key: {발급된 API Key}
+```
+
+API Key 발급 방법은 [API Key 발급](/open-api) 문서를 참고하세요.
+
+## 응답 래퍼
+
+모든 응답은 공통 `ResponseBody` 포맷으로 감싸져 내려갑니다.
+
+```json
+{
+  "code": "SUCCESS",
+  "message": "OK",
+  "data": { ... },
+  "traceId": "00-xxxxx-xxxxx-01"
+}
+```
+
+| 필드        | 타입   | 설명                                      |
+| ----------- | ------ | ----------------------------------------- |
+| `code`      | string | 응답 코드 (성공 시 `SUCCESS`)             |
+| `message`   | string | 응답 메시지                               |
+| `data`      | object | 실제 응답 데이터 (엔드포인트별 상이)      |
+| `traceId`   | string | 요청 추적용 ID                            |
+
+## 에러 응답
+
+에러 응답에도 동일한 래퍼가 사용되며 `code`, `message`, `traceId`가 포함됩니다.
+문의 시 `traceId`를 함께 공유해 주시면 빠른 추적이 가능합니다.
+
+## OpenAPI 문서
+
+| 형식 | URL                          |
+| ---- | ---------------------------- |
+| JSON | `GET /v3/api-docs`           |
+| UI   | `GET /swagger-ui/index.html` |

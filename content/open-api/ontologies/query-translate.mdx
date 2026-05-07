@@ -1,0 +1,79 @@
+# Translate SQL — 자연어 → Ontology Lake SQL 변환
+
+회사의 온톨로지 메타데이터를 활용해 자연어 질문을 Ontology Lake SQL 쿼리로 변환합니다.
+
+- **Endpoint**: `POST /open/v1/ontologies/query-translate`
+- **Tag**: `Open API`
+- **인증**: API Key (`x-api-key`)
+
+응답 래퍼/에러 포맷은 [공통 사항](/open-api/common) 문서를 참고하세요.
+
+---
+
+## Request
+
+### Headers
+
+| Header      | 타입   | 필수 | 설명                |
+| ----------- | ------ | ---- | ------------------- |
+| `x-api-key` | string | Y    | 발급된 API Key      |
+
+### Body
+
+```json
+{
+  "question": "지난 30일간 가장 많이 판매된 상품 TOP 10을 알려줘",
+  "ontologyIds": [101, 102]
+}
+```
+
+| 필드          | 타입     | 필수 | 설명                                                       |
+| ------------- | -------- | ---- | ---------------------------------------------------------- |
+| `question`    | string   | Y    | 자연어 질문                                                |
+| `ontologyIds` | number[] | N    | 변환에 사용할 온톨로지 ID 화이트리스트. 미지정 시 전체 대상 |
+
+---
+
+## Response (`data`)
+
+```json
+{
+  "sql": "SELECT product_id, SUM(quantity) ... ",
+  "reasoning": "사용된 테이블/조건에 대한 설명",
+  "usedOntologies": [
+    {
+      "id": 101,
+      "name": "orders",
+      "displayName": "주문",
+      "type": "Json",
+      "collectionName": "orders_collection",
+      "fullyQualifiedTableName": "warehouse.public.orders"
+    }
+  ]
+}
+```
+
+| 필드                                       | 타입            | 설명                                          |
+| ------------------------------------------ | --------------- | --------------------------------------------- |
+| `sql`                                      | string \| null  | 변환된 Ontology Lake SQL. 변환 실패 시 null   |
+| `reasoning`                                | string          | 변환 근거/추론 설명                           |
+| `usedOntologies[].id`                      | number          | 사용된 온톨로지 ID                            |
+| `usedOntologies[].name`                    | string          | 시스템 식별 이름                              |
+| `usedOntologies[].displayName`             | string \| null  | 표시용 이름                                   |
+| `usedOntologies[].type`                    | string          | 온톨로지 타입 (예: `Json`)                    |
+| `usedOntologies[].collectionName`          | string          | 컬렉션/소스 이름                              |
+| `usedOntologies[].fullyQualifiedTableName` | string \| null  | SQL 실행 대상 테이블 FQN                      |
+
+---
+
+## Example
+
+```bash
+curl -X POST "https://[your-base-url]/open/v1/ontologies/query-translate" \
+  -H "x-api-key: YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "question": "지난 30일간 가장 많이 판매된 상품 TOP 10을 알려줘",
+    "ontologyIds": [101, 102]
+  }'
+```

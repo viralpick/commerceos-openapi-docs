@@ -1,0 +1,77 @@
+# 클라이언트 연결
+
+발급된 MCP 서버를 외부 MCP 클라이언트에 등록하는 방법입니다.
+
+## 준비물
+
+서버 발급 완료 모달에서 확인한 두 가지 값을 준비하세요.
+
+| 항목             | 예시                                                                  |
+| ---------------- | --------------------------------------------------------------------- |
+| **엔드포인트 URL** | `https://agent-api.commerceos.ai/mcp/019e0297-b899-7268-9f99-1db46d6843af` |
+| **토큰**         | `mcp_1MCxLhaxuHP7nL_BSTS1DCWs39qbjssPDRVzBR5RRiQ`                      |
+
+> 토큰을 분실한 경우 [서버 발급](/mcp/create-server)으로 돌아가 새 서버를 발급하세요. 보안상 기존 토큰은 다시 표시할 수 없습니다.
+
+## 인증 방식
+
+발급된 MCP 서버는 HTTP 헤더 기반 Bearer 인증을 사용합니다.
+
+```
+Authorization: Bearer {발급된 토큰}
+```
+
+대부분의 MCP 클라이언트는 서버 등록 시 URL과 인증 헤더를 함께 입력하는 UI를 제공합니다.
+
+## Claude Desktop
+
+Claude Desktop 설정 파일에 아래 형식으로 추가합니다. (macOS: `~/Library/Application Support/Claude/claude_desktop_config.json`)
+
+```json
+{
+  "mcpServers": {
+    "commerceos": {
+      "url": "https://agent-api.commerceos.ai/mcp/019e0297-b899-7268-9f99-1db46d6843af",
+      "headers": {
+        "Authorization": "Bearer mcp_1MCxLhaxuHP7nL_BSTS1DCWs39qbjssPDRVzBR5RRiQ"
+      }
+    }
+  }
+}
+```
+
+설정 저장 후 Claude Desktop을 재시작하면 등록된 도구를 채팅에서 호출할 수 있습니다.
+
+## Cursor
+
+Cursor의 MCP 설정 파일(`~/.cursor/mcp.json`)에 동일한 형식으로 등록할 수 있습니다.
+
+```json
+{
+  "mcpServers": {
+    "commerceos": {
+      "url": "https://agent-api.commerceos.ai/mcp/019e0297-b899-7268-9f99-1db46d6843af",
+      "headers": {
+        "Authorization": "Bearer mcp_1MCxLhaxuHP7nL_BSTS1DCWs39qbjssPDRVzBR5RRiQ"
+      }
+    }
+  }
+}
+```
+
+## 연결 확인
+
+클라이언트 재시작 후 다음을 확인하세요.
+
+1. 등록한 서버가 도구 목록에 표시되는지 확인
+2. 노출 도구로 선택한 Object/Dictionary 이름이 사용 가능한 도구로 나타나는지 확인
+3. 서버 활성 토글이 켜져 있는지 MCP 관리 페이지에서 확인
+
+## 트러블슈팅
+
+| 증상                                    | 원인 / 조치                                                                 |
+| --------------------------------------- | -------------------------------------------------------------------------- |
+| 401 Unauthorized                        | 토큰이 잘못되었거나 만료. 서버를 재발급해 새 토큰으로 교체하세요.            |
+| 404 Not Found                           | 엔드포인트 URL이 잘못되었거나 서버가 삭제됨. URL을 다시 확인하세요.          |
+| 도구가 보이지 않음                      | MCP 관리 페이지에서 서버의 **활성** 토글이 꺼져 있는지 확인하세요.           |
+| 특정 Object가 도구로 노출되지 않음      | 서버 발급 시 해당 Object를 노출 도구로 선택했는지 확인하세요. 변경하려면 새 서버를 발급하세요. |
