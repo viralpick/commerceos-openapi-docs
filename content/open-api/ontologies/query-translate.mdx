@@ -4,7 +4,7 @@
 
 - **Endpoint**: `POST /open/v1/ontologies/query-translate`
 - **Tag**: `Open API`
-- **인증**: API Key (`x-api-key`)
+- **인증**: API Key (`Authorization: Bearer {API_KEY}`)
 
 응답 래퍼/에러 포맷은 [공통 사항](/open-api/common) 문서를 참고하세요.
 
@@ -14,9 +14,9 @@
 
 ### Headers
 
-| Header      | 타입   | 필수 | 설명                |
-| ----------- | ------ | ---- | ------------------- |
-| `x-api-key` | string | Y    | 발급된 API Key      |
+| Header          | 타입   | 필수 | 설명                                        |
+| --------------- | ------ | ---- | ------------------------------------------- |
+| `Authorization` | string | Y    | Bearer 토큰 형식의 API Key. `Bearer {API_KEY}` |
 
 ### Body
 
@@ -38,7 +38,7 @@
 
 ```json
 {
-  "sql": "SELECT product_id, SUM(quantity) ... ",
+  "sparkSql": "SELECT product_id, SUM(quantity) ... ",
   "reasoning": "사용된 테이블/조건에 대한 설명",
   "usedOntologies": [
     {
@@ -55,7 +55,7 @@
 
 | 필드                                       | 타입            | 설명                                          |
 | ------------------------------------------ | --------------- | --------------------------------------------- |
-| `sql`                                      | string \| null  | 변환된 Ontology Lake SQL. 변환 실패 시 null   |
+| `sparkSql`                                 | string \| null  | 변환된 Ontology Lake SQL. 변환 실패 시 null   |
 | `reasoning`                                | string          | 변환 근거/추론 설명                           |
 | `usedOntologies[].id`                      | number          | 사용된 온톨로지 ID                            |
 | `usedOntologies[].name`                    | string          | 시스템 식별 이름                              |
@@ -70,7 +70,7 @@
 
 ```bash
 curl -X POST "https://[your-base-url]/open/v1/ontologies/query-translate" \
-  -H "x-api-key: YOUR_API_KEY" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
     "question": "지난 30일간 가장 많이 판매된 상품 TOP 10을 알려줘",

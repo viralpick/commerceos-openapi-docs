@@ -12,10 +12,10 @@ https://[your-base-url]
 
 ## 인증
 
-Open API(`/open/v1/**`)는 헤더 `x-api-key`로 인증합니다.
+Open API(`/open/v1/**`)는 헤더 `Authorization`에 Bearer 토큰 형식으로 인증합니다.
 
 ```
-x-api-key: {발급된 API Key}
+Authorization: Bearer {발급된 API Key}
 ```
 
 API Key 발급 방법은 [API Key 발급](/open-api) 문서를 참고하세요.

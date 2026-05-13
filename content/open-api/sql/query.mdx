@@ -4,7 +4,7 @@
 
 - **Endpoint**: `POST /open/v1/sql/query`
 - **Tag**: `Open API`
-- **인증**: API Key (`x-api-key`)
+- **인증**: API Key (`Authorization: Bearer {API_KEY}`)
 
 응답 래퍼/에러 포맷은 [공통 사항](/open-api/common) 문서를 참고하세요.
 
@@ -14,9 +14,9 @@
 
 ### Headers
 
-| Header      | 타입   | 필수 | 설명                |
-| ----------- | ------ | ---- | ------------------- |
-| `x-api-key` | string | Y    | 발급된 API Key      |
+| Header          | 타입   | 필수 | 설명                                        |
+| --------------- | ------ | ---- | ------------------------------------------- |
+| `Authorization` | string | Y    | Bearer 토큰 형식의 API Key. `Bearer {API_KEY}` |
 
 ### Body
 
@@ -61,7 +61,7 @@
 
 ```bash
 curl -X POST "https://[your-base-url]/open/v1/sql/query" \
-  -H "x-api-key: YOUR_API_KEY" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
     "sql": "SELECT product_id, COUNT(*) AS cnt FROM warehouse.public.orders GROUP BY product_id LIMIT 10",
@@ -74,5 +74,5 @@ curl -X POST "https://[your-base-url]/open/v1/sql/query" \
 ## 권장 사용 패턴
 
 1. [`POST /open/v1/ontologies/query-translate`](/open-api/ontologies/query-translate)로 자연어를 Ontology Lake SQL로 변환
-2. 응답의 `sql` 값을 `POST /open/v1/sql/query`의 `sql` 필드로 그대로 전달
+2. 응답의 `sparkSql` 값을 `POST /open/v1/sql/query`의 `sql` 필드로 그대로 전달
 3. 결과 `columns`, `rows`로 후처리/렌더링
