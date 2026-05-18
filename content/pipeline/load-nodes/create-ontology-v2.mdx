@@ -1,0 +1,31 @@
+import { Callout } from 'nextra/components'
+
+# Lake Ontology Create
+
+Lake(Iceberg/Spark) 기반으로 온톨로지 오브젝트를 생성·갱신한다. 내부적으로 SparkSQL `MERGE INTO`를 사용하여 대량 데이터에 효율적으로 적재한다. 기존 `Upsert MongoDB → Create Ontology` (v1) 두 단계 흐름을 하나로 통합한 신규 노드이며, **신규 파이프라인의 권장 노드**이다.
+
+## 설정
+
+| 필드 | 필수 | 설명 |
+|---|---|---|
+| Ontology Name (`ontology_name`) | Yes | 생성할 온톨로지 이름. |
+| Collection (`collection_id`) | Yes | 적재 대상 컬렉션. |
+| Merge Keys (`merge_keys`) | Yes | MERGE 시 행 식별 기준 필드(최소 1개). |
+| Description (`description`) | No | 온톨로지 설명. |
+| Structure (`structure`) | No | 구조 정의. |
+| Columns (`columns`) | No | 활용할 컬럼 화이트리스트. |
+
+## 검증 규칙
+
+- 1개 이상의 incoming edge 필수.
+- `ontology_name`, `collection_id`, `merge_keys` (≥ 1) 필수.
+
+<Callout type="warning">
+  본 노드는 기존 `Upsert MongoDB` + `Create Ontology` (v1) 두 단계 흐름을 대체한다. 신규 파이프라인은 본 노드를 사용한다.
+</Callout>
+
+## 관련 문서
+
+- [Object Creation](/pipeline/load-nodes/object-creation)
+- [Upsert Knowledge](/pipeline/load-nodes/knowledge-upsert)
+- 온톨로지 사용자 문서는 [Object](/ontology-management/object) 참고.

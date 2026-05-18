@@ -1,0 +1,22 @@
+# Upsert Knowledge
+
+데이터프레임 행을 기반으로 Knowledge Dictionary에 항목을 upsert한다. 변환된 텍스트·메타데이터를 LLM이 참조할 수 있도록 사전화한다.
+
+## 설정
+
+| 필드 | 필수 | 설명 |
+|---|---|---|
+| Knowledge Name (`knowledge_name`) | Yes | 대상 지식 컬렉션 이름. |
+
+## 검증 규칙
+
+- 1개 이상의 outgoing edge 필수.
+
+## 사용 시점
+
+- LLM Operator가 비정형 문서에서 추출한 정형 텍스트를 지식 사전으로 적재할 때.
+- 외부 API에서 가져온 메타데이터를 지식으로 등록할 때.
+
+## 관련 문서
+
+- 사용자 측 가이드는 [Dictionary](/ontology-management/dictionary) 참고.

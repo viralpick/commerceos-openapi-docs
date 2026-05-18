@@ -1,0 +1,18 @@
+# Notebook Transform
+
+Jupyter-style 셀 편집기에서 Python으로 데이터프레임을 가공한다. Custom Node와 달리 셀 단위 + 파라미터 바인딩 + 코드 자동완성을 지원하므로, 코드 작성과 검증이 더 용이하다.
+
+## 사용 시점
+
+표준 Transform 노드로 해결되지 않는 가공이 필요하며 Python으로 구현 가능한 경우에 사용한다.
+
+## 셀과 파라미터
+
+- 코드 셀(`code`): Python 실행 단위.
+- 마크다운 셀(`markdown`): 설명·메모용.
+- 파라미터 엔트리: `{ key, type, value }` — 타입은 `string` / `number` / `boolean` / `null`. 셀에서 동일 이름 변수로 사용 가능하다.
+- 실행 타임아웃(`execution_timeout_seconds`): 1 ~ 1800.
+
+## 권장 사용 순서
+
+> 표준 Transform 노드 → `Notebook Transform` → `Custom Node` → `Custom` 순으로 선택을 검토한다.

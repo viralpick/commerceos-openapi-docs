@@ -1,0 +1,38 @@
+import { Callout } from 'nextra/components'
+
+# Parse Document
+
+LLM 기반 문서 파서로, 선택적 OCR 병행을 통해 비정형 문서를 markdown으로 추출한다. 캔버스 label은 `Parse Document Operator`이며, PDF / PPTX / DOCX / XLSX 등의 파일을 LLM이 소비 가능한 markdown으로 변환한다.
+
+## 사용 시점
+
+매뉴얼, 계약서, 보고서, 스캔본 등 비정형 문서를 후속 LLM Operator나 정형 적재 노드에서 활용하려 할 때 사용한다.
+
+## 설정
+
+| 필드 | 필수 | 설명 |
+|---|---|---|
+| Parser Model (`model`) | Yes | LLM 모델 선택. `useLLMsEnvs().models` 중 `visible`인 모델만 노출. 기본값 `gemini-3-flash-preview`. |
+| Enable OCR (`mode`) | No | 토글. `llm_only`(기본) / `ocr_llm`. *Run optical character recognition alongside the LLM for scanned pages and image-heavy documents.* 스캔본·이미지 중심 문서일 때 켠다. |
+
+## 검증 규칙
+
+- 1개 이상의 outgoing connection이 필수이다.
+- Parser Model 미선택 시 검증 오류가 발생한다.
+
+## 출력 / 후속 단계
+
+- 본 노드는 일반적인 dataframe이 아니라 **parse job**을 생성한다.
+- 결과 markdown은 다음 노드(통상 `LLM Operator`)가 `file_filter`로 선택해 소비한다.
+
+<Callout type="warning">
+  `Parse Document`는 비동기 잡으로 실행된다. 일반 데이터 프리뷰와 다르게 동작하므로, 결과 확인과 디버깅은 [Parse Outputs](/pipeline/parse-outputs/viewer) 화면에서 수행한다.
+</Callout>
+
+## 권장 체인
+
+```text
+Data Retrieval >> Parse Document >> LLM Operator >> Object Creation (또는 Upsert Knowledge)
+```
+
+전체 흐름과 단계별 역할은 [Parse Pipeline 구성](/pipeline/parse-outputs/chain) 참고.

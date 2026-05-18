@@ -1,0 +1,55 @@
+import { Callout } from 'nextra/components'
+
+# 카탈로그 (Catalog)
+
+<Callout type="warning">
+Preview 단계 기능이다. 동작과 UI는 향후 변경될 수 있다.
+</Callout>
+
+Collection 단위로 오브젝트 묶음을 관리한다. SQL/Cypher 직접 편집과 자연어 → SQL 변환, 그리고 Action 시스템을 제공한다. 경로 `/ontology/catalog`.
+
+## Collection 관리
+
+- **생성**: 이름(영문·언더스코어), Display Name, Description.
+- **조회**: Collection 목록과 소속 오브젝트(이름·Display Name·타입·Row Count·File Count·Size·생성일) 표시.
+- **수정/삭제**: Display Name·Description 수정, Collection 삭제(복구 불가).
+
+## 쿼리 편집기
+
+- **SQL 쿼리** — 예: `SELECT * FROM catalog_7.organization.products LIMIT 100`. 결과: 행 수, 실행 시간.
+- **Cypher 쿼리** — 예: `MATCH (n:products) RETURN n LIMIT 50`. 결과: 노드 수, 엣지 수, 그래프 시각화.
+- **자연어 → SQL** — 데이터에 대해 자연어로 질의하면 변환된 SQL, 추론 과정, 사용된 온톨로지를 함께 보여준다.
+
+## Action 시스템
+
+### Action 종류
+
+| 타입 | 설명 |
+|---|---|
+| `CREATE` | 새 row 생성 |
+| `UPDATE` | 조건에 맞는 row 갱신 |
+| `DELETE` | 조건에 맞는 row 삭제 |
+| `CUSTOM` | 외부 API 등 직접 정의 |
+
+### Step 타입
+
+- `HTTP` — 외부 API 호출
+- `ONTOLOGY_CREATE` / `ONTOLOGY_UPDATE` / `ONTOLOGY_DELETE` — 온톨로지 데이터 CUD
+- `WORKFLOW` — Workflow 실행
+- `NOTIFY_TRIGGER_WORK` — Work 실행 트리거 알림
+
+### 4단계 위저드
+
+1. **기본 정보** — 이름(영소문자 + 숫자 + 언더스코어), Display Name, Description, Action 타입.
+2. **동작 정의** — Step 추가/삭제, 각 Step 타입 설정, 성공/실패 시 다음 Step 분기.
+3. **변수** — 입력 파라미터(이름·타입·필수 여부·설명·Ontology Link 바인딩).
+4. **검토** — 요약·요청 본문(JSON)·Step 미리보기.
+
+## 실행 방식
+
+- **Execute** — 실제 데이터 변경.
+- **Dry-run** — 변수 치환을 시뮬레이션. 데이터 변경 없음.
+
+<Callout type="warning">
+실 운영 데이터에 영향을 주는 Action은 반드시 Dry-run으로 먼저 검증한 뒤 Execute한다.
+</Callout>

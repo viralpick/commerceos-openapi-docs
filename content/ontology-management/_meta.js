@@ -1,6 +1,8 @@
 export default {
   index: "Overview",
   object: "Object",
+  catalog: "Catalog (Preview)",
   link: "Link",
-  knowledge: "Knowledge",
+  dictionary: "Dictionary",
+  "test-case": "Test Case",
 };

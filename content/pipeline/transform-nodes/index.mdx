@@ -59,6 +59,30 @@ Transform 단계는 Extract 단계에서 수집된 데이터를 **목적에 맞�
 
 ---
 
+### Parse Document
+
+LLM 기반(필요 시 OCR 병행) 문서 파서. 비정형 문서를 markdown으로 추출하며 비동기 잡으로 동작한다.
+
+자세한 설정은 [Parse Document](/pipeline/transform-nodes/parse-document) 참고.
+
+---
+
+### LLM Operator
+
+LLM 모델을 사용해 입력 데이터에 시스템 프롬프트를 적용하고 **구조화된 JSON**을 출력하는 일반 변환 노드.
+
+자세한 설정은 [LLM Operator](/pipeline/transform-nodes/llm-operator) 참고.
+
+---
+
+### Notebook Transform
+
+Jupyter 셀 편집기 + 파라미터 바인딩으로 Python 데이터 변환을 구성한다. `Custom Node`보다 우선 권장.
+
+자세한 설정은 [Notebook Transform](/pipeline/transform-nodes/notebook-transform) 참고.
+
+---
+
 ### 설계 가이드
 
 - Transform 단계는 단순 가공을 넘어, **온톨로지 구조에 적합한 데이터 형태를 만드는 핵심 단계**이다.

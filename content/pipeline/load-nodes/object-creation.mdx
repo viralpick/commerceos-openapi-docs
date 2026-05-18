@@ -1,0 +1,19 @@
+# Object Creation
+
+데이터프레임 행을 기반으로 온톨로지 오브젝트를 생성한다. 비정형 흐름(`Parse Document → LLM Operator → Object Creation`)의 적재 노드로 자주 사용된다.
+
+## 설정
+
+| 필드 | 필수 | 설명 |
+|---|---|---|
+| Name (`name`) | Yes | 생성할 오브젝트 이름. |
+| Primary Key (`primary_key`) | No | 주키로 사용할 필드. |
+| Connection (`connection`) | No | 사용할 데이터 연결 ID. |
+
+## 검증 규칙
+
+- 1개 이상의 outgoing edge 필수.
+
+## 관련 문서
+
+- 사용자 측 오브젝트 관리는 [Object](/ontology-management/object) 참고.
