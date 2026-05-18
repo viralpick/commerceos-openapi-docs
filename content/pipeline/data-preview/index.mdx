@@ -52,12 +52,16 @@ Data Preview는 파이프라인 상에서 특정 노드를 기준으로 일부 �
 - 업스트림에 다음 중 하나가 존재해야 함
   - `Data Retrieval (DB)`
   - `Data Retrieval (HTTP)`
+  - `Generate Data`
+  - `Read Ontology Object`
 
 다음 조건에 해당하면 버튼이 비활성화된다.
 
 - 노드 타입이 `custom` 또는 `custom-node`
 - 업스트림에 `custom` 노드가 존재
 - 데이터 소스 노드가 연결되지 않음
+
+> `Parse Document`는 비동기 파싱 잡으로 실행되므로 일반 프리뷰가 아닌 [Parse Outputs](/pipeline/parse-outputs) 화면에서 결과를 확인한다.
 
 ---
 

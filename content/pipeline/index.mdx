@@ -1,3 +1,5 @@
+import { Callout } from 'nextra/components'
+
 # 1. 파이프라인
 
 파이프라인 빌더는 다양한 외부 데이터 소스로부터 데이터를 수집하고, 이를 온톨로지 구조에 맞게 변환하여 시스템에 적재할 수 있도록 지원하는 기능이다.
@@ -28,9 +30,14 @@
 
 - 대부분의 노드는 **데이터 프리뷰(Data Preview)** 기능을 지원한다.  
   다만, 다음 노드에서는 데이터 프리뷰를 사용할 수 없다.
+  - `Parse Document` — 비동기 파싱 잡으로 실행되며, 결과는 Parse Outputs 화면에서 확인한다.
+  - `Lake Ontology Create`
+  - `Upsert Knowledge`
+  - `Ontology Link Create`
+  - `Object Creation`
+  - `Mongo Upsert` (Deprecated)
+  - `Create Ontology` (Deprecated)
   - `Custom Node`
-  - `Mongo Upsert`
-  - `Create Ontology`
 
 - 데이터 프리뷰는 최대 **100건**까지 지원한다.
 
@@ -40,6 +47,28 @@
 
 다음은 외부 데이터를 수집하여 온톨로지로 생성할 때 자주 사용하는 대표적인 파이프라인 구성이다.
 
+#### 정형(테이블) 데이터 → 온톨로지
+
 ```text
-Start >> Data Retrieval >> Transform (선택) >> Mongo Upsert >> Create Ontology >> End
+Start >> Data Retrieval (DB) >> Transform … >> Lake Ontology Create >> End
 ```
+
+#### 외부 API → 온톨로지
+
+```text
+Start >> Data Retrieval (HTTP) [+ Backfill] >> Transform … >> Object Creation / Upsert Knowledge / Ontology Link Create >> End
+```
+
+#### 비정형 문서 → 온톨로지
+
+```text
+Start >> Data Retrieval >> Parse Document >> LLM Operator >> Object Creation (또는 Upsert Knowledge) >> End
+```
+
+자세한 구성은 [Parse Outputs](/pipeline/parse-outputs)를 참고한다.
+
+---
+
+<Callout type="warning">
+  `Mongo Upsert`와 `Create Ontology`(v1)는 Deprecated 노드이다. 신규 파이프라인에서는 `Lake Ontology Create`(Load Nodes 참고)를 사용한다.
+</Callout>

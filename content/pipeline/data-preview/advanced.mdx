@@ -20,6 +20,8 @@ Data Preview는 반드시 다음 조건을 만족해야 실행 가능하다.
 - 현재 노드 기준으로 역방향 경로 상에
   - `Data Retrieval (DB)`
   - `Data Retrieval (HTTP)`
+  - `Generate Data`
+  - `Read Ontology Object`
     중 하나 이상 존재해야 한다
 
 이는 프리뷰가 **실제 데이터 소스를 기반으로만 동작**하기 때문이다.
@@ -43,11 +45,19 @@ Data Preview는 반드시 다음 조건을 만족해야 실행 가능하다.
 
 또한, 해당 노드 이후의 모든 노드 역시 프리뷰 대상에서 제외된다.
 
+> `Parse Document`는 비동기 파싱 잡으로 실행되어 일반 프리뷰가 아닌 Parse Outputs 화면에서 결과를 확인한다.
+
 ---
 
 ### 스킵 처리 노드
 
-- 데이터 저장 계열 노드 (예: Mongo Upsert)
+- 데이터 저장 계열 노드
+  - `Lake Ontology Create`
+  - `Upsert Knowledge`
+  - `Ontology Link Create`
+  - `Object Creation`
+  - `Parse Document` (비동기)
+  - `Mongo Upsert` (Deprecated)
 
 특징:
 

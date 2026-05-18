@@ -1,0 +1,17 @@
+# Format Helpers
+
+데이터 포맷을 다음 단계가 기대하는 형태로 변환하는 헬퍼 노드. 내부 `nodeCategory`는 `null`이지만 흐름상 Transform 단계에 위치한다.
+
+## SQL → JSON (`sql-to-json`)
+
+- DB 쿼리 결과(2D row)를 JSON 행 단위로 변환해 후속 LLM/JSON 노드가 소비할 수 있게 한다.
+
+| 필드 | 필수 | 설명 |
+|---|---|---|
+| `conn_id` | Yes | SQL 연결 ID. |
+| `sql` | Yes | 실행할 쿼리. |
+
+## JSON → Mongo (`json-to-mongo`)
+
+- JSON 행을 MongoDB 적재 형식으로 변환한다. 보통 LLM Operator 뒤, Upsert MongoDB(legacy) 앞에 배치한다.
+- 자동 변환 노드로 별도 설정 필드가 없다.

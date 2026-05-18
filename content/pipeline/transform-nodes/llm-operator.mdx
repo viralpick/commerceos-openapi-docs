@@ -1,0 +1,46 @@
+import { Callout } from 'nextra/components'
+
+# LLM Operator
+
+LLM 모델을 변환 노드로 사용해 입력 데이터에 시스템 프롬프트를 적용하고 **구조화된 JSON**을 출력한다. 캔버스 label은 `LLM Operator`, 패널 제목은 `LLM`이다. parse 결과를 정형 스키마로 추출하거나 자연어를 카테고리로 분류하는 일반 도구로 사용된다.
+
+## 사용 시점
+
+- parsed 비정형 텍스트를 정형 스키마로 추출할 때
+- 자연어를 카테고리로 분류할 때
+- 정형 데이터에 LLM 기반 변환(요약·정규화·태깅)을 적용할 때
+
+## 설정
+
+| 필드 | 필수 | 설명 |
+|---|---|---|
+| Model (`model_code`) | Yes | `useLLMsEnvs().models` 기반 선택. |
+| System Prompt (`system_prompt`) | Yes | Textarea. 플레이스홀더 *Describe how this agent should behave...*. 모델 동작을 정의한다. |
+| JSON Schema (`json_schema`) | Yes | 출력 구조 정의. `JsonSchemaInlineEditor`(Visual / JSON 모드). 타입: `string`, `number`, `integer`, `boolean`, `enum`, `object`. 토글: `isArray`, `isRequired`. 최대 5단계 중첩. |
+| File Filter (`file_filter`) | 조건부 | **부모가 `Parse Document`인 경우에만 노출**. `{ files: string[], include_future: boolean }`. LLM이 소비할 parsed 파일을 선택한다. |
+
+## 검증 규칙
+
+- 1개 이상의 outgoing connection이 필수이다.
+- Model, System Prompt, JSON Schema 미설정 시 검증 오류가 발생한다.
+- 부모가 `Parse Document`이면 `file_filter.files`가 1개 이상 또는 `include_future === true`여야 한다.
+
+<Callout type="warning">
+  `File Filter` 필드는 LLM Operator의 **직접 부모가 `Parse Document`** 일 때에만 노출된다. 두 노드를 다른 노드를 거치지 않고 직접 연결해야 한다.
+</Callout>
+
+## 자주 발생하는 오류
+
+- JSON Schema와 System Prompt의 출력 형식 불일치
+- `Parse Document` 부모인데 `File Filter` 미설정
+- System Prompt가 모호하여 LLM이 스키마를 무시
+
+## 권장 체인
+
+Parse Document 흐름 안에서는 다음 위치에 배치한다.
+
+```text
+Data Retrieval >> Parse Document >> LLM Operator >> Object Creation (또는 Upsert Knowledge)
+```
+
+전체 흐름과 단계별 역할은 [Parse Pipeline 구성](/pipeline/parse-outputs/chain) 참고.
