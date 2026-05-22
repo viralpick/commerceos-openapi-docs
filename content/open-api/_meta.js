@@ -3,5 +3,6 @@ export default {
     common: '공통 사항',
     ontologies: 'Ontologies',
     sql: 'SQL',
-    works: 'Works'
+    works: 'Works',
+    pipelines: 'Pipelines'
 }
