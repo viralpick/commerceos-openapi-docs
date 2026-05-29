@@ -23,14 +23,16 @@
 ```json
 {
   "question": "지난 30일간 가장 많이 판매된 상품 TOP 10을 알려줘",
-  "ontologyIds": [101, 102]
+  "ontologyIds": [101, 102],
+  "includeReasoning": false
 }
 ```
 
-| 필드          | 타입     | 필수 | 설명                                                       |
-| ------------- | -------- | ---- | ---------------------------------------------------------- |
-| `question`    | string   | Y    | 자연어 질문                                                |
-| `ontologyIds` | number[] | N    | 변환에 사용할 온톨로지 ID 화이트리스트. 미지정 시 전체 대상 |
+| 필드               | 타입     | 필수 | 기본값 | 설명                                                                     |
+| ------------------ | -------- | ---- | ------ | ------------------------------------------------------------------------ |
+| `question`         | string   | Y    | -      | 자연어 질문                                                              |
+| `ontologyIds`      | number[] | N    | 전체   | 변환에 사용할 온톨로지 ID 화이트리스트. 미지정 시 전체 대상              |
+| `includeReasoning` | boolean  | N    | `true` | `false`면 `reasoning`을 생성하지 않아 응답 속도가 빨라집니다 (항상 null) |
 
 ---
 
@@ -56,7 +58,7 @@
 | 필드                                       | 타입            | 설명                                          |
 | ------------------------------------------ | --------------- | --------------------------------------------- |
 | `sparkSql`                                 | string \| null  | 변환된 Ontology Lake SQL. 변환 실패 시 null   |
-| `reasoning`                                | string          | 변환 근거/추론 설명                           |
+| `reasoning`                                | string \| null  | 변환 근거/추론 설명. `includeReasoning: false`면 항상 null |
 | `usedOntologies[].id`                      | number          | 사용된 온톨로지 ID                            |
 | `usedOntologies[].name`                    | string          | 시스템 식별 이름                              |
 | `usedOntologies[].displayName`             | string \| null  | 표시용 이름                                   |
@@ -74,6 +76,7 @@ curl -X POST "https://[your-base-url]/open/v1/ontologies/query-translate" \
   -H "Content-Type: application/json" \
   -d '{
     "question": "지난 30일간 가장 많이 판매된 상품 TOP 10을 알려줘",
-    "ontologyIds": [101, 102]
+    "ontologyIds": [101, 102],
+    "includeReasoning": false
   }'
 ```
