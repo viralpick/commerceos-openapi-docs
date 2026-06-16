@@ -16,7 +16,7 @@ Flow Nodes는 파이프라인의 **실행 흐름과 제어 구조**를 담당하
 
 - 파이프라인의 **종료점**을 의미하는 노드
 - 모든 파이프라인은 반드시 **1개의 End 노드**를 포함해야 한다
-- End 노드 이후에는 후속 outgoing edge를 연결할 수 없다
+- End 노드 이후에는 다른 노드를 연결할 수 없다
 
 ---
 
@@ -24,21 +24,21 @@ Flow Nodes는 파이프라인의 **실행 흐름과 제어 구조**를 담당하
 
 - 일정 윈도우 단위로 **과거 데이터를 점진적으로 재적재**하기 위한 노드
 - 데이터 소스 노드(`Data Retrieval` 등) 바로 앞에 위치하여, 윈도우 단위로 반복 실행을 트리거한다
-- 다운스트림 노드에서는 현재 윈도우 범위를 `$backfill_window_start` / `$backfill_window_end` 변수로 참조할 수 있다
+- 후속 노드에서는 현재 윈도우 범위를 `$backfill_window_start` / `$backfill_window_end` 변수로 참조할 수 있다
 
 #### 주요 설정 항목
 
 | 필드 | 필수 | 설명 |
 |---|---|---|
-| Unit (`unit`) | Yes | 윈도우 단위. `day` / `week` / `month` 중 선택. |
-| Anchor (`anchor`) | Yes | 기준 시점. `logical_date`(DAG 실행 시점) / `today`(UTC) 중 선택. |
-| Reference Date (`reference_date`) | No | ISO `YYYY-MM-DD` 형식. 설정 시 Anchor를 무시하고 해당 일자를 시작점으로 사용. |
-| Max Iterations (`max_iterations`) | No | 1 ~ 10,000. 자기 트리거 체인의 반복 횟수 상한. 비우면 데이터가 없을 때까지 실행. |
+| Window Unit | Yes | 윈도우 단위. day / week / month 중 선택. |
+| Anchor Date Source | Yes | 기준 시점. 파이프라인 실행 시점 또는 오늘(UTC 기준) 중 선택. |
+| Reference Date Override | No | ISO 형식 (YYYY-MM-DD). 설정 시 Anchor Date Source를 무시하고 해당 일자를 시작점으로 사용. |
+| Max Iterations (Safety Cap) | No | 1 ~ 10,000. 반복 횟수 상한. 비우면 데이터가 없을 때까지 실행. |
 
 #### 사용 가이드
 
 - 파이프라인당 **1개만 허용**되며, 데이터 소스 노드(`Data Retrieval` 등) 바로 앞에 위치해야 한다.
-- 운영 환경에서는 `Max Iterations`를 설정하여 무한 루프를 방지하는 것을 권장한다.
+- 운영 환경에서는 Max Iterations를 설정하여 무한 루프를 방지하는 것을 권장한다.
 
 ---
 

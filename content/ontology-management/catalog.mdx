@@ -26,17 +26,17 @@ Collection 단위로 오브젝트 묶음을 관리한다. SQL/Cypher 직접 편�
 
 | 타입 | 설명 |
 |---|---|
-| `CREATE` | 새 row 생성 |
-| `UPDATE` | 조건에 맞는 row 갱신 |
-| `DELETE` | 조건에 맞는 row 삭제 |
-| `CUSTOM` | 외부 API 등 직접 정의 |
+| CREATE | 새 행을 생성한다. |
+| UPDATE | 조건에 맞는 행을 갱신한다. |
+| DELETE | 조건에 맞는 행을 삭제한다. |
+| CUSTOM | 외부 API 호출 등 직접 정의한 동작을 수행한다. |
 
 ### Step 타입
 
-- `HTTP` — 외부 API 호출
-- `ONTOLOGY_CREATE` / `ONTOLOGY_UPDATE` / `ONTOLOGY_DELETE` — 온톨로지 데이터 CUD
-- `WORKFLOW` — Workflow 실행
-- `NOTIFY_TRIGGER_WORK` — Work 실행 트리거 알림
+- 외부 API 호출 (HTTP) — 외부 시스템의 API를 호출한다.
+- 온톨로지 생성 / 수정 / 삭제 — 온톨로지 데이터를 생성·수정·삭제한다.
+- Workflow 실행 — 지정한 Workflow를 실행한다.
+- Work 실행 트리거 알림 — Work 실행을 트리거하는 알림을 발송한다.
 
 ### 4단계 위저드
 

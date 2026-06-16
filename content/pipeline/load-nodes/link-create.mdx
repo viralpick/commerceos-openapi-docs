@@ -6,21 +6,21 @@ import { Callout } from 'nextra/components'
 
 ## 핸들 구조
 
-본 노드는 두 개의 incoming 핸들(`from`, `to`)을 가진다. 각 핸들에 정확히 1개의 incoming edge가 필요하다.
+본 노드는 두 개의 입력 지점(`From`, `To`)을 가진다. 각 입력 지점에 정확히 1개의 선행 노드가 연결되어야 한다.
 
 ## 설정
 
 | 필드 | 필수 | 설명 |
 |---|---|---|
-| Link Type (`link_type`) | Yes | `sameAs`, `subClassOf`, `partOf`, `hasPart`, `inverseOf`, `symmetric`, `relatedTo`, `disjointWith`, `SourceOf` 중 선택. |
-| Term (`term`) | No | 링크 라벨/용어. |
-| From Cardinality (`from_cardinality`) | No | `One and Only One`, `Many`, `Zero or One`, `Zero or Many`, `One or Many`. |
-| To Cardinality (`to_cardinality`) | No | `One and Only One`, `Many`, `Zero or One`, `Zero or Many`, `One or Many`. |
-| From Field Name (`from_field_name`) | No | 매핑할 from 측 필드명. |
-| To Field Name (`to_field_name`) | No | 매핑할 to 측 필드명. |
+| Link Type | Yes | 다음 중 하나를 선택한다: sameAs, subClassOf, partOf, hasPart, inverseOf, symmetric, relatedTo, disjointWith, SourceOf. |
+| Predicate Term | No | 링크 라벨/용어 (예: "고객의 주문"). |
+| Cardinality (From) | No | One and Only One, Many, Zero or One, Zero or Many, One or Many 중 선택. |
+| Cardinality (To) | No | One and Only One, Many, Zero or One, Zero or Many, One or Many 중 선택. |
+| Field Names (From Field) | No | 매핑할 From 측 필드명. |
+| Field Names (To Field) | No | 매핑할 To 측 필드명. |
 
 <Callout type="warning">
-  `from` 핸들과 `to` 핸들 각각에 정확히 1개의 incoming edge가 연결되어야 한다. 다른 위상 구조에서는 검증 오류가 발생한다.
+  From 입력 지점과 To 입력 지점에는 각각 정확히 1개의 선행 노드가 연결되어야 한다. 다른 구조에서는 검증 오류가 발생한다.
 </Callout>
 
 ## 관련 문서
