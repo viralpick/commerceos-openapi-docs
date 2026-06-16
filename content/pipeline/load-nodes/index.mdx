@@ -8,7 +8,7 @@ Load 단계는 Transform을 거친 데이터를 **최종 저장소에 적재**�
 
 ### Lake Ontology Create
 
-Lake(Iceberg/Spark) 기반으로 온톨로지 오브젝트를 생성·갱신하는 신규 노드이다. 기존 `Upsert MongoDB → Create Ontology` (v1) 두 단계 흐름을 하나로 통합한 노드이며, **신규 파이프라인의 권장 노드**이다.
+대량 데이터를 효율적으로 일괄 업서트하여 온톨로지 오브젝트를 생성·갱신하는 신규 노드이다. 기존 Upsert MongoDB → Create Ontology (v1) 두 단계 흐름을 하나로 통합한 노드이며, **신규 파이프라인의 권장 노드**이다.
 
 자세한 설정은 [Lake Ontology Create](/pipeline/load-nodes/create-ontology-v2) 참고.
 
@@ -41,7 +41,7 @@ Lake(Iceberg/Spark) 기반으로 온톨로지 오브젝트를 생성·갱신하�
 ### Deprecated 노드
 
 <Callout type="warning">
-  `Upsert MongoDB`와 `Create Ontology` (v1)는 **`Lake Ontology Create`** 로 대체되었다. 기존 파이프라인 유지보수 목적 외에는 사용하지 않는다.
+  Upsert MongoDB와 Create Ontology (v1)는 **Lake Ontology Create**로 대체되었다. 기존 파이프라인 유지보수 목적 외에는 사용하지 않는다.
 </Callout>
 
 #### (Deprecated) Upsert MongoDB
@@ -54,7 +54,7 @@ Lake(Iceberg/Spark) 기반으로 온톨로지 오브젝트를 생성·갱신하�
   - 존재하지 않을 경우 → **Insert 수행**
 
 <Callout type="warning">
-  Collection 이름은 후속 `Create Ontology` (v1) 노드의 Ontology Name과 반드시 일치해야 한다 (legacy 흐름 한정).
+  Collection 이름은 후속 Create Ontology (v1) 노드의 Ontology Name과 반드시 일치해야 한다 (legacy 흐름 한정).
 </Callout>
 
 #### (Deprecated) Create Ontology
@@ -64,7 +64,7 @@ MongoDB에 적재된 데이터를 기반으로 **온톨로지(Object 등)를 생
 - **Ontology Name**: 생성할 온톨로지의 이름.
 
 <Callout type="warning">
-  Ontology Name은 선행 `Upsert MongoDB` 노드의 Collection 이름과 반드시 일치해야 한다 (legacy 흐름 한정).
+  Ontology Name은 선행 Upsert MongoDB 노드의 Collection 이름과 반드시 일치해야 한다 (legacy 흐름 한정).
 </Callout>
 
 ---

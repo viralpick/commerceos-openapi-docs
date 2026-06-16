@@ -13,6 +13,13 @@ Extract 단계는 파이프라인에서 데이터를 **외부 소스로부터 �
 - 사전에 정의된 데이터베이스 연결을 기반으로 쿼리를 실행하여 데이터를 가져온다
 - 사용자는 필요한 데이터를 조회하기 위해 직접 SQL 쿼리를 작성할 수 있다
 
+#### 주요 설정 항목
+
+| 필드 | 필수 | 설명 |
+|---|---|---|
+| Connection | Yes | 사전 등록된 DB 연결을 선택한다. 연결 종류에 따라 하위 입력 항목이 동적으로 노출된다. |
+| Options | No | 연결 종류별 추가 옵션을 JSON 형식으로 지정한다. |
+
 ---
 
 ### Data Retrieval (HTTP)
@@ -29,15 +36,13 @@ Extract 단계는 파이프라인에서 데이터를 **외부 소스로부터 �
 
 | 필드 | 필수 | 설명 |
 |---|---|---|
-| API URL (`apiUrl`) | Yes | API 기본 URL. |
-| Endpoint (`endpoint`) | Yes | 엔드포인트 경로. |
-| Method (`method`) | Yes | `GET` / `POST` / `PUT` 중 선택. |
-| OAuth Connection (`oauthConnId`) | No | 사전 등록된 OAuth2 연결 ID. |
-| Body (`data`) | No | 요청 본문. |
-| Query Parameters (`parameters`) | No | 쿼리 파라미터. |
-| Headers (`headers`) | No | JSON 형식의 요청 헤더. |
-
-> 노드의 내부 타입 이름은 `oauth2-api`이며, OAuth2 인증을 통해 외부 API를 호출한다.
+| API Url | Yes | API 기본 URL. |
+| Endpoint | Yes | 엔드포인트 경로. |
+| Method | Yes | GET / POST / PUT 중 선택. |
+| OAuth Connection ID | No | 사전 등록된 OAuth2 연결을 선택한다. |
+| Data | No | 요청 본문(Request Body). |
+| Parameters | No | 쿼리 파라미터. |
+| Headers | No | JSON 형식의 요청 헤더. |
 
 ---
 
@@ -45,25 +50,25 @@ Extract 단계는 파이프라인에서 데이터를 **외부 소스로부터 �
 
 - 외부 소스 없이 **합성(synthetic) 데이터를 생성**하는 노드
 - 데이터 소스 연결 없이도 후속 노드(Transform, Load 등)를 테스트할 수 있도록 지원하며, 프로토타이핑이나 파이프라인 검증 용도로 활용된다
-- Faker 기반의 다양한 provider(Person / Address / Internet / Phone / Job·Company / Date·Time / Numeric / Pattern·Enum / Boolean / Color 등)를 제공한다
+- 내장된 다양한 생성기(이름·주소·이메일·전화번호·직업·날짜·숫자·패턴·Enum·불리언·색상 등)에서 컬럼별로 선택할 수 있다
 
 #### 주요 설정 항목
 
 | 필드 | 필수 | 설명 |
 |---|---|---|
-| Row Count (`rowCount`) | Yes | 생성할 행 수. 프리뷰는 최대 100행으로 제한된다. |
-| Locale (`locale`) | No | 데이터 로케일(예: `ko_KR`, `en_US`). 일부 provider는 영문 전용이므로 locale 무관하게 영문이 생성된다. |
-| Seed (`seed`) | No | 재현 가능한 결과를 위한 정수 시드. 설정 시 동일 입력에 대해 동일한 데이터를 생성한다. |
-| Columns (`columns`) | Yes | 컬럼 정의 목록. 각 컬럼은 아래 하위 필드를 가진다. |
+| Row Count | Yes | 생성할 행 수. 프리뷰는 최대 100행으로 제한된다. |
+| Locale | No | 데이터 로케일(예: ko_KR, en_US). 일부 생성기는 영문 전용이므로 로케일과 무관하게 영문이 생성된다. |
+| Reproducible Seed | No | 재현 가능한 결과를 위한 정수 시드. 설정 시 동일 입력에 대해 동일한 데이터를 생성한다. |
+| Columns | Yes | 컬럼 정의 목록. 각 컬럼은 아래 하위 필드를 가진다. |
 
-`columns` 각 항목의 하위 필드:
+각 컬럼의 하위 필드:
 
 | 필드 | 필수 | 설명 |
 |---|---|---|
-| `name` | Yes | 컬럼 이름. |
-| `provider` | Yes | Faker provider 식별자(예: `name`, `email`, `address`, `date_time`, `pyint` 등). |
-| `percentNulls` | No | 0 ~ 100(%) 범위의 NULL 비율. |
-| `args` | No | provider별 추가 인자(범위, enum, 길이 제한 등). |
+| Name | Yes | 컬럼 이름. |
+| Provider | Yes | 사용할 생성기(예: 이름, 이메일, 주소, 날짜·시간, 정수 등). |
+| Percent Nulls | No | 0 ~ 100(%) 범위의 NULL 비율. |
+| Args | No | 생성기별 추가 인자(범위, Enum, 길이 제한 등). |
 
 ---
 
@@ -77,10 +82,10 @@ Extract 단계는 파이프라인에서 데이터를 **외부 소스로부터 �
 
 | 필드 | 필수 | 설명 |
 |---|---|---|
-| Ontology Object (`ontology_object_id`) | Yes | 대상 온톨로지 오브젝트 ID. |
-| Filters (`filters`) | No | JSON 객체 형식의 필터 조건. 예: `{"sku": "A1", "status": ["A", "B"]}`. |
-| Limit (`limit`) | No | 최대 행 수(상한 10,000,000). 비우면 전체 행을 읽는다. |
-| Select Columns (`select_columns`) | No | 가져올 컬럼 화이트리스트. 비우면 모든 컬럼을 읽는다. |
+| Ontology Object | Yes | 대상 온톨로지 오브젝트를 선택한다. |
+| Filters | No | JSON 객체 형식의 필터 조건. 예: `{"sku": "A1", "status": ["A", "B"]}`. |
+| Limit | No | 최대 행 수(상한 10,000,000). 비우면 전체 행을 읽는다. |
+| Select Columns | No | 가져올 컬럼 목록. 비우면 모든 컬럼을 읽는다. |
 
 ---
 

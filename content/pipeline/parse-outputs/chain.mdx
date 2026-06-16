@@ -16,18 +16,18 @@ Data Retrieval (HTTP / DB) → Parse Document → LLM Operator → Object Creati
 
 - **Data Retrieval** — 파일 메타 또는 바이너리 위치 수집. HTTP의 경우 OAuth2 인증을 통해 외부에서 가져온다.
 - **Parse Document** — LLM(필요 시 OCR 병행)으로 비정형 문서를 markdown으로 추출. 비동기 잡을 생성한다. → 상세: [Parse Document](/pipeline/transform-nodes/parse-document)
-- **LLM Operator** — parsed markdown에서 구조화된 JSON 추출. `file_filter`로 소비할 파일을 선택한다. → 상세: [LLM Operator](/pipeline/transform-nodes/llm-operator)
+- **LLM Operator** — 파싱된 markdown에서 구조화된 JSON을 추출한다. Select Input 필드에서 어떤 파싱 결과 파일을 입력으로 사용할지 선택한다. 전체 파일을 선택한 상태에서는 "미래 추가 파일 포함" 토글로 이후 새로 추가되는 파일을 자동 포함할지 결정할 수 있다. → 상세: [LLM Operator](/pipeline/transform-nodes/llm-operator)
 - **Object Creation / Upsert Knowledge / 등** — 추출된 구조화 데이터를 온톨로지·지식 사전에 적재.
 
 <Callout type="warning">
-`LLM Operator`의 `File Filter` 필드는 **직접 부모가 `Parse Document`인 경우에만** 노출된다. 두 노드 사이에 다른 노드를 끼우면 `LLM Operator`는 일반 dataframe 변환 노드로 동작한다.
+LLM Operator의 Select Input 필드는 **선행 노드가 Parse Document인 경우에만** 노출된다. 두 노드 사이에 다른 노드가 끼어 있으면 Select Input이 노출되지 않고 LLM Operator는 일반 변환 노드로 동작한다.
 </Callout>
 
 ## 데이터 프리뷰 동작
 
-`Parse Document` 노드는 비동기 잡으로 실행되므로 일반 노드와 달리 캔버스의 데이터 프리뷰가 아닌 [결과 뷰어](/pipeline/parse-outputs/viewer)에서 결과를 확인한다.
+Parse Document 노드는 비동기 잡으로 실행되므로 일반 노드와 달리 캔버스의 데이터 프리뷰가 아닌 [결과 뷰어](/pipeline/parse-outputs/viewer)에서 결과를 확인한다.
 
 ## 운영 팁
 
-- 첫 실행 시 결과 markdown이 비어있거나 잘리는 경우 → `Parse Document`의 `Enable OCR`을 켜고 재실행
-- LLM Operator JSON Schema와 System Prompt 출력 형식 불일치 시 → Schema 필드명을 프롬프트 안에서도 명시
+- 첫 실행 시 결과 markdown이 비어있거나 잘리는 경우 → Parse Document의 Enable OCR을 켜고 재실행
+- LLM Operator의 JSON Schema와 System Prompt 출력 형식이 일치하지 않을 때 → Schema 필드명을 프롬프트 안에서도 명시

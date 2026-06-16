@@ -5,11 +5,11 @@
 Data Preview는 전체 파이프라인이 아닌,  
 선택된 노드까지의 경로를 기준으로 **부분 실행(partial execution)**을 수행한다.
 
-이때 서버는 다음 정보를 기반으로 결과를 반환한다.
+결과 패널에는 다음 정보가 표시된다.
 
-- 실행 대상 노드 (`targetNodeId`)
-- 노드 실행 순서 (`executionOrder`)
-- 노드별 실행 결과 (`previewMap`)
+- 실행 대상 노드
+- 노드 실행 순서
+- 노드별 실행 결과
 
 ---
 
@@ -32,32 +32,32 @@ Data Preview는 반드시 다음 조건을 만족해야 실행 가능하다.
 
 ### 프리뷰 불가 노드
 
-- `start`
-- `end`
-- `note`
+- Start
+- End
+- Note
 
 ---
 
 ### 프리뷰 비활성 노드
 
-- `custom`
-- `custom-node`
+- Custom
+- Custom Node
 
 또한, 해당 노드 이후의 모든 노드 역시 프리뷰 대상에서 제외된다.
 
-> `Parse Document`는 비동기 파싱 잡으로 실행되어 일반 프리뷰가 아닌 Parse Outputs 화면에서 결과를 확인한다.
+> Parse Document는 비동기 파싱 잡으로 실행되어 일반 프리뷰가 아닌 Parse Outputs 화면에서 결과를 확인한다.
 
 ---
 
 ### 스킵 처리 노드
 
 - 데이터 저장 계열 노드
-  - `Lake Ontology Create`
-  - `Upsert Knowledge`
-  - `Ontology Link Create`
-  - `Object Creation`
-  - `Parse Document` (비동기)
-  - `Mongo Upsert` (Deprecated)
+  - Lake Ontology Create
+  - Upsert Knowledge
+  - Ontology Link Create
+  - Object Creation
+  - Parse Document (비동기)
+  - Mongo Upsert (Deprecated)
 
 특징:
 

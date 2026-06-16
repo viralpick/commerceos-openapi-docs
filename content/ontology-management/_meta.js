@@ -4,5 +4,5 @@ export default {
   catalog: "Catalog (Preview)",
   link: "Link",
   dictionary: "Dictionary",
-  "test-case": "Test Case",
+  "test-case": { display: "hidden" },
 };
