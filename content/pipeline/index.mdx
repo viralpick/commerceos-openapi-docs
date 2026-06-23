@@ -50,19 +50,25 @@ import { Callout } from 'nextra/components'
 #### 정형(테이블) 데이터 → 온톨로지
 
 ```text
-Start >> Data Retrieval (DB) >> Transform … >> Lake Ontology Create >> End
+Start >> Retrieve Data (DB) >> Transform … >> Lake Ontology Create >> End
 ```
 
 #### 외부 API → 온톨로지
 
 ```text
-Start >> Data Retrieval (HTTP) [+ Backfill] >> Transform … >> Object Creation / Upsert Knowledge / Ontology Link Create >> End
+Start >> Retrieve Data (HTTP) [+ Backfill] >> Transform … >> Object Creation / Upsert Knowledge / Ontology Link Create >> End
+```
+
+#### 파일/스토리지 데이터 → 온톨로지
+
+```text
+Start >> Retrieve Data (File) >> Transform … >> Lake Ontology Create >> End
 ```
 
 #### 비정형 문서 → 온톨로지
 
 ```text
-Start >> Data Retrieval >> Parse Document >> LLM Operator >> Object Creation (또는 Upsert Knowledge) >> End
+Start >> Retrieve Data (File) >> Parse Document >> LLM Operator >> Object Creation (또는 Upsert Knowledge) >> End
 ```
 
 자세한 구성은 [Parse Outputs](/pipeline/parse-outputs)를 참고한다.

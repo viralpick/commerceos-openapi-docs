@@ -7,14 +7,14 @@ import { Callout } from 'nextra/components'
 ## 권장 체인
 
 ```text
-Data Retrieval (HTTP / DB) → Parse Document → LLM Operator → Object Creation (또는 Upsert Knowledge)
+Retrieve Data (HTTP / DB) → Parse Document → LLM Operator → Object Creation (또는 Upsert Knowledge)
 ```
 
 필요 시 Object Creation 대신 다른 Load 노드(Lake Ontology Create, Upsert Knowledge, Ontology Link Create)로 분기 가능하다.
 
 ## 단계별 역할
 
-- **Data Retrieval** — 파일 메타 또는 바이너리 위치 수집. HTTP의 경우 OAuth2 인증을 통해 외부에서 가져온다.
+- **Retrieve Data** — 파일 메타 또는 바이너리 위치 수집. HTTP의 경우 OAuth2 인증을 통해 외부에서 가져온다.
 - **Parse Document** — LLM(필요 시 OCR 병행)으로 비정형 문서를 markdown으로 추출. 비동기 잡을 생성한다. → 상세: [Parse Document](/pipeline/transform-nodes/parse-document)
 - **LLM Operator** — 파싱된 markdown에서 구조화된 JSON을 추출한다. Select Input 필드에서 어떤 파싱 결과 파일을 입력으로 사용할지 선택한다. 전체 파일을 선택한 상태에서는 "미래 추가 파일 포함" 토글로 이후 새로 추가되는 파일을 자동 포함할지 결정할 수 있다. → 상세: [LLM Operator](/pipeline/transform-nodes/llm-operator)
 - **Object Creation / Upsert Knowledge / 등** — 추출된 구조화 데이터를 온톨로지·지식 사전에 적재.

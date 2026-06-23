@@ -1,3 +1,5 @@
+import { Callout } from 'nextra/components'
+
 ## Extract Nodes
 
 Extract 단계는 파이프라인에서 데이터를 **외부 소스로부터 수집**하는 단계로, 전체 ETL 과정의 시작 지점에 해당한다.  
@@ -7,11 +9,12 @@ Extract 단계는 파이프라인에서 데이터를 **외부 소스로부터 �
 
 ---
 
-### Data Retrieval (DB)
+### Retrieve Data (DB)
 
 - SQL 기반 데이터 소스(예: RDBMS)로부터 데이터를 조회하는 노드
 - 사전에 정의된 데이터베이스 연결을 기반으로 쿼리를 실행하여 데이터를 가져온다
 - 사용자는 필요한 데이터를 조회하기 위해 직접 SQL 쿼리를 작성할 수 있다
+- **DB/HTTP 등 쿼리 커넥션 전용**이며, 파일(스토리지) 소스는 아래 [Retrieve Data (File)](#retrieve-data-file) 노드를 사용한다
 
 #### 주요 설정 항목
 
@@ -20,9 +23,34 @@ Extract 단계는 파이프라인에서 데이터를 **외부 소스로부터 �
 | Connection | Yes | 사전 등록된 DB 연결을 선택한다. 연결 종류에 따라 하위 입력 항목이 동적으로 노출된다. |
 | Options | No | 연결 종류별 추가 옵션을 JSON 형식으로 지정한다. |
 
+<Callout type="warning">
+  기존에 이 노드에 파일(스토리지) 커넥션을 설정해 둔 파이프라인은 **배포가 차단**된다. `Retrieve Data (File)` 노드로 교체해야 하며, 자세한 절차는 [파일 커넥션 마이그레이션 가이드](/pipeline/extract-nodes/legacy-file-connection)를 참고한다.
+</Callout>
+
 ---
 
-### Data Retrieval (HTTP)
+### Retrieve Data (File)
+
+- S3, Azure Blob, SharePoint, Google Sheets 등 **파일시스템(스토리지) 소스로부터 파일을 읽어오는 노드**
+- 디렉토리 단위로 여러 파일을 일괄 수집하거나, 단일 파일을 지정하여 가져올 수 있다
+- Open API의 파일 업로드 실행과 연동되는 `uploaded_file` 커넥터도 지원한다
+
+#### 주요 설정 항목
+
+| 필드 | 필수 | 설명 |
+|---|---|---|
+| Connection | Yes | 사전 등록된 파일시스템 커넥션을 선택한다(`s3`, `azure_blob`, `azure_blob_ak`, `sharepoint`, `google_sheets`, `uploaded_file`). |
+| Directory / File | Yes | 디렉토리 또는 단일 파일 URI. 예: `s3://bucket/prefix/`, `s3://bucket/a.parquet`. |
+| Include Pattern | No | 가져올 파일명 glob 패턴. 쉼표로 여러 개 지정 가능(예: `*.pdf, reports/*.csv`). 디렉토리 listing 에만 적용된다. |
+| Exclude Pattern | No | 제외할 파일명 glob 패턴. 쉼표로 여러 개 지정 가능(예: `tmp/*, *_SUCCESS`). 디렉토리 listing 에만 적용된다. |
+
+<Callout type="info">
+  `uploaded_file` 커넥터를 사용하면 Open API 파일 업로드 실행 시 파일 경로가 자동으로 주입되며, `Directory / File` 값은 읽기 전용으로 표시된다. 자세한 내용은 [Run with File](/open-api/pipelines/run-with-file)을 참고한다.
+</Callout>
+
+---
+
+### Retrieve Data (HTTP)
 
 - 외부 API를 통해 데이터를 수집하는 노드
 - OAuth2 인증 방식을 사용하는 API와 연동할 수 있다
