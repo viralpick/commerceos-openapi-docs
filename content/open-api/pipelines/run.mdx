@@ -1,0 +1,195 @@
+# Pipeline Run — 파일 없이 파이프라인 실행
+
+파일 업로드 없이 해당 파이프라인(DAG)의 실행을 **비동기로 트리거**합니다. 요청 즉시 `dagRunId`를 반환하며, 실제 실행 완료를 기다리지 않습니다.
+
+- **Endpoint**: `POST /open/v1/pipelines/{pipelineId}/run`
+- **Tag**: `Open API`
+- **인증**: API Key (`x-api-key: {API_KEY}`)
+- **권한**: `pipeline_builder.pipeline` × `execute` (기존 `runs/with-file`과 동일)
+
+파일을 입력으로 받는 파이프라인은 [Run with File](/open-api/pipelines/run-with-file)을 사용하세요.
+
+---
+
+## 인증
+
+```
+x-api-key: YOUR_API_KEY
+```
+
+- 인증 방식: **API Key (회사 단위)**
+- 회사 컨텍스트는 API Key에서 자동 resolve — 별도 tenant 헤더 불필요
+- 인증 실패: `401`
+
+---
+
+## Request
+
+### Path Parameters
+
+| Path param   | 타입   | 필수 | 설명                                                                    |
+| ------------ | ------ | ---- | ----------------------------------------------------------------------- |
+| `pipelineId` | string | Y    | DAG ID. API Key가 귀속된 회사의 파이프라인만 지정할 수 있습니다.        |
+
+### Headers
+
+| Header         | 타입   | 필수 | 설명                                          |
+| -------------- | ------ | ---- | --------------------------------------------- |
+| `x-api-key`    | string | Y    | 발급받은 API Key                              |
+| `Content-Type` | string | N    | `application/json`. 본문을 보낼 때만 필요합니다 |
+
+### Body
+
+본문 전체가 optional입니다. 아무것도 보내지 않아도 실행됩니다.
+
+```json
+{
+  "logicalDate": "2026-08-19T02:00:00+09:00",
+  "conf": {
+    "target_date": "2026-08-18",
+    "full_refresh": false
+  },
+  "note": "manual backfill"
+}
+```
+
+| 필드          | 타입              | 필수 | 설명                                                                                    |
+| ------------- | ----------------- | ---- | --------------------------------------------------------------------------------------- |
+| `logicalDate` | string (ISO-8601) | N    | Airflow `logical_date`. 생략하면 Airflow가 현재 시각을 사용합니다.                       |
+| `conf`        | object            | N    | `dag_run.conf`로 그대로 전달됩니다. DAG 내부에서 `{{ dag_run.conf['키'] }}`로 참조합니다. |
+| `note`        | string            | N    | run에 남는 메모. Airflow UI 및 조회 응답에 노출됩니다.                                   |
+
+### `conf` 예약 키
+
+`tenant_id`, `tenant_name`은 요청에 담아도 **서버가 제거**하고 DAG 정보에서 파생한 값으로 채웁니다.
+
+> Airflow의 `dag_run_conf_overrides_params` 기본값이 `true`이기 때문에, 이 키를 허용하면 다른 테넌트의 시크릿·커넥션·스토리지 경로를 읽을 수 있게 됩니다. 그래서 클라이언트 입력을 신뢰하지 않고 항상 서버가 결정합니다.
+
+---
+
+## Response — 200 OK
+
+```json
+{
+  "meta": { "code": "Success", "message": "ok" },
+  "data": {
+    "dagRunId": "manual__0f9c7d2e-4a11-4c88-9d3f-6b2e5a7c1088",
+    "dagId": "company_123_daily_sales_sync",
+    "state": "QUEUED",
+    "logicalDate": "2026-08-19T02:11:43+00:00",
+    "startDate": null,
+    "note": null
+  },
+  "traceId": "3f2b9c4d5e6a7b8c"
+}
+```
+
+| 필드          | 타입           | 설명                                                                                       |
+| ------------- | -------------- | ------------------------------------------------------------------------------------------ |
+| `dagRunId`    | string         | `manual__{uuid}` 형식. 같은 `logicalDate`로 여러 번 실행할 수 있도록 매 요청 새 UUID를 발급합니다. |
+| `dagId`       | string         | 요청한 `pipelineId`                                                                        |
+| `state`       | string         | `QUEUED` / `RUNNING` / `SUCCESS` / `FAILED`                                                |
+| `logicalDate` | string \| null | Airflow가 확정한 logical date                                                              |
+| `startDate`   | string \| null | 실제 시작 시각. 트리거 직후에는 보통 `null` (아직 queued)                                  |
+| `note`        | string \| null | 요청의 `note`                                                                              |
+
+> ⚠️ **`state`는 대문자입니다.** 내부(FE) API는 같은 값을 `queued` / `running`처럼 소문자로 직렬화하는데, Open API는 enum 이름을 그대로 내려 대문자입니다. 두 API를 함께 쓰는 클라이언트는 대소문자를 정규화해서 비교하세요.
+
+응답에 Airflow 내부 필드(`runType`, `triggeredBy`, `duration`, `endDate`)는 노출하지 않습니다.
+
+---
+
+## Errors
+
+에러 응답도 모두 `{ "meta": { "code": ..., "message": ... }, "data": null, "traceId": ... }` 형태입니다.
+
+| HTTP | 상황                                        | `message`                                                                        |
+| ---- | ------------------------------------------- | -------------------------------------------------------------------------------- |
+| 400  | 파이프라인이 꺼져 있음(paused)              | `파이프라인이 꺼져 있어 실행할 수 없습니다. 파이프라인을 켠 후 다시 시도해주세요.` |
+| 400  | 이미 실행 중인 run 존재                     | `이미 실행 중인 파이프라인이 있습니다.`                                          |
+| 400  | 이미 대기 중인 run 존재                     | `이미 실행 대기 중인 파이프라인이 있습니다.`                                     |
+| 401  | API Key 누락·무효                           | `유효하지 않은 요청입니다.`                                                      |
+| 403  | `pipeline_builder.pipeline:execute` 권한 없음 | `접근 권한이 없습니다.`                                                          |
+| 404  | 해당 `pipelineId` 없음                      | `존재하는 데이터 커넥터가 없습니다`                                              |
+| 409  | run 충돌                                    | `리소스 충돌이 발생했습니다`                                                     |
+| 502  | Airflow 응답 실패                           | `유효한 응답을 받아오지 못했습니다`                                              |
+
+장애 문의 시 응답의 `traceId`를 함께 전달하면 전체 호출 흐름을 추적할 수 있습니다.
+
+---
+
+## Examples
+
+### curl — 본문 없이 실행
+
+```bash
+curl -X POST "https://{host}/open/v1/pipelines/company_123_daily_sales_sync/run" \
+  -H "x-api-key: YOUR_API_KEY"
+```
+
+### curl — `conf` 전달
+
+```bash
+curl -X POST "https://{host}/open/v1/pipelines/company_123_daily_sales_sync/run" \
+  -H "x-api-key: YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+        "conf": { "target_date": "2026-08-18", "full_refresh": false },
+        "note": "manual backfill"
+      }'
+```
+
+### JavaScript / fetch
+
+```javascript
+const res = await fetch(
+  `${HOST}/open/v1/pipelines/${pipelineId}/run`,
+  {
+    method: "POST",
+    headers: {
+      "x-api-key": API_KEY,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      conf: { target_date: "2026-08-18", full_refresh: false },
+      note: "manual backfill",
+    }),
+  }
+);
+
+const json = await res.json();
+console.log(json.data.dagRunId); // "manual__<uuid>"
+```
+
+### Python / requests
+
+```python
+import requests
+
+res = requests.post(
+    f"{HOST}/open/v1/pipelines/{pipeline_id}/run",
+    headers={"x-api-key": API_KEY},
+    json={
+        "conf": {"target_date": "2026-08-18", "full_refresh": False},
+        "note": "manual backfill",
+    },
+)
+
+print(res.json()["data"]["dagRunId"])
+```
+
+---
+
+## 사용 시 주의
+
+### 1. 파일을 소비하는 DAG는 이 엔드포인트로 실행할 수 없습니다
+
+retriever 노드가 `{{ dag_run.conf['uploaded_file_path'] }}`를 참조하는 파이프라인은 `conf`에 파일 키가 없어 태스크에서 실패합니다. 이 경우 [`POST /open/v1/pipelines/{pipelineId}/runs/with-file`](/open-api/pipelines/run-with-file)을 사용하세요.
+
+### 2. 중복 실행 거부는 동시 요청에 대해 보장되지 않습니다
+
+running/queued 검사와 트리거가 원자적이지 않아 동시 요청 두 건이 함께 통과할 수 있습니다. 다만 Pipeline Builder가 생성하는 DAG는 `max_active_runs=1`이라 그 경우에도 동시 실행되지는 않고, 두 번째 run이 queued 상태로 대기합니다.
+
+### 3. run 상태를 조회하는 Open API는 아직 없습니다
+
+현재 `/open/v1`에는 실행 트리거만 있고 run 조회·취소 엔드포인트가 없어, 응답의 `dagRunId`로 진행 상황을 폴링할 수 없습니다. 완료 여부 확인이 필요한 연동이라면 DAG 마지막 단계에서 고객사 쪽으로 알리는 방식(webhook·알림 노드)을 함께 설계해야 합니다.
