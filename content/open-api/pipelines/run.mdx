@@ -4,7 +4,7 @@
 
 - **Endpoint**: `POST /open/v1/pipelines/{pipelineId}/run`
 - **Tag**: `Open API`
-- **인증**: API Key (`x-api-key: {API_KEY}`)
+- **인증**: API Key (`Authorization: Bearer {API_KEY}`)
 - **권한**: `pipeline_builder.pipeline` × `execute` (기존 `runs/with-file`과 동일)
 
 파일을 입력으로 받는 파이프라인은 [Run with File](/open-api/pipelines/run-with-file)을 사용하세요.
@@ -14,7 +14,7 @@
 ## 인증
 
 ```
-x-api-key: YOUR_API_KEY
+Authorization: Bearer sk_live_xxxxxxxxxxxxxxxx
 ```
 
 - 인증 방식: **API Key (회사 단위)**
@@ -33,10 +33,10 @@ x-api-key: YOUR_API_KEY
 
 ### Headers
 
-| Header         | 타입   | 필수 | 설명                                          |
-| -------------- | ------ | ---- | --------------------------------------------- |
-| `x-api-key`    | string | Y    | 발급받은 API Key                              |
-| `Content-Type` | string | N    | `application/json`. 본문을 보낼 때만 필요합니다 |
+| Header          | 타입   | 필수 | 설명                                            |
+| --------------- | ------ | ---- | ----------------------------------------------- |
+| `Authorization` | string | Y    | Bearer 토큰 형식의 API Key. `Bearer {API_KEY}`  |
+| `Content-Type`  | string | N    | `application/json`. 본문을 보낼 때만 필요합니다 |
 
 ### Body
 
@@ -124,14 +124,14 @@ x-api-key: YOUR_API_KEY
 
 ```bash
 curl -X POST "https://{host}/open/v1/pipelines/company_123_daily_sales_sync/run" \
-  -H "x-api-key: YOUR_API_KEY"
+  -H "Authorization: Bearer YOUR_API_KEY"
 ```
 
 ### curl — `conf` 전달
 
 ```bash
 curl -X POST "https://{host}/open/v1/pipelines/company_123_daily_sales_sync/run" \
-  -H "x-api-key: YOUR_API_KEY" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
         "conf": { "target_date": "2026-08-18", "full_refresh": false },
@@ -147,7 +147,7 @@ const res = await fetch(
   {
     method: "POST",
     headers: {
-      "x-api-key": API_KEY,
+      Authorization: `Bearer ${API_KEY}`,
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
@@ -168,7 +168,7 @@ import requests
 
 res = requests.post(
     f"{HOST}/open/v1/pipelines/{pipeline_id}/run",
-    headers={"x-api-key": API_KEY},
+    headers={"Authorization": f"Bearer {API_KEY}"},
     json={
         "conf": {"target_date": "2026-08-18", "full_refresh": False},
         "note": "manual backfill",
