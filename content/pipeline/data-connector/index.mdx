@@ -1,0 +1,23 @@
+import { Callout } from 'nextra/components'
+
+# Data Connector
+
+Data Connector는 파이프라인이 외부 시스템(DB, 스토리지, API 등)에 접속할 때 사용하는 **연결 정보(Connection)** 를 관리하는 영역이다.  
+**[파이프라인 > 데이터 관리]** 메뉴에서 연결을 등록하면, `Retrieve Data (DB)` · `Retrieve Data (File)` · `Retrieve Data (HTTP)` 등 Extract 노드와 Load 노드에서 해당 연결을 선택해 재사용할 수 있다.
+
+---
+
+## 사내망 DB 연결 — 터널 Agent
+
+고객사 사내망에 있는 DB는 인터넷에서 직접 접근할 수 없다. 이런 경우 인바운드 방화벽을 열지 않고 AgentOS가 사내 DB에 접속할 수 있도록 **터널 Agent(`aos-tunnel`)** 를 사내 VM에 설치한다.
+
+- 사내 VM에서 AgentOS로 **바깥으로 나가는 연결 하나**만 유지한다. 인바운드 포트 개방이 필요 없다.
+- Agent는 TCP 바이트만 중계하며, 데이터를 해석·저장하거나 쿼리를 만들지 않는다.
+- Agent가 접근할 수 있는 사내 목적지는 **VM의 설정 파일(`egress.allow`)** 에 적힌 목록으로 제한된다.
+- 개인키는 VM에서 생성하고 **공개키만** 전달한다. 개인키는 어느 방향으로도 오가지 않는다.
+
+설치 절차는 [터널 Agent 설치 (Docker)](/pipeline/data-connector/tunnel-agent)를 참고한다.
+
+<Callout type="info">
+  터널 Agent의 연결 상태(온라인/오프라인)와 테넌트별 **서버 공개키**는 AgentOS 관리 화면의 터널 설정에서 확인할 수 있다. Agent 등록·승인은 인핸스에서 진행하며, 승인이 완료되면 Agent가 자동으로 연결된다.
+</Callout>

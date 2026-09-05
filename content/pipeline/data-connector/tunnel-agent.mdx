@@ -1,0 +1,319 @@
+import { Callout } from 'nextra/components'
+
+# 터널 Agent 설치 (Docker)
+
+AgentOS가 **인바운드 방화벽 개방 없이** 사내 DB에 접속할 수 있도록, 사내 VM에서 바깥으로 나가는 연결 하나를 유지하는 `aos-tunnel` agent를 설치하는 방법을 안내한다.  
+컨테이너 하나로 동작하며, 사내망으로 나가는 TCP 외에 어떤 권한도 필요하지 않다.
+
+| 구분 | 내용 |
+|---|---|
+| 설치 방식 | Docker 이미지 기반 |
+| 이미지 | `<namespace>/commerce-os-aos-tunnel` |
+| 지원 플랫폼 | Linux amd64 / arm64 |
+
+---
+
+## 이 agent가 하는 일
+
+Agent는 **TCP 바이트만 중계한다.** 데이터를 해석하거나 저장하지 않고, 쿼리를 만들지도 않는다. AgentOS가 요청한 목적지로 TCP 연결을 열어 바이트를 그대로 옮기는 것이 전부이며, 파이프라인 로직과 접속 정보는 모두 AgentOS 쪽에 있다.
+
+- **통제권은 VM에 있다** — agent가 열어 줄 수 있는 목적지는 **VM의 설정 파일**에 적힌 목록뿐이다. AgentOS가 다른 곳을 요청하면 agent가 거부하고 사유를 로그에 남긴다.
+- **개인키는 VM을 떠나지 않는다** — 키쌍은 VM에서 만들고 **공개키만** 전달한다. AgentOS가 이 agent를 사칭할 수 없고, 반대로 중간 장비가 AgentOS를 사칭하는 것도 서버 키 확인으로 막는다.
+
+---
+
+## 요구사항
+
+| 항목 | 내용 |
+|---|---|
+| OS | Linux x86_64 또는 arm64 (배포판 무관) |
+| 런타임 | Docker 20.10+ 또는 동등한 컨테이너 런타임 |
+| **agent 버전** | **`v0.61.1` 이상.** 그 아래는 서버와 핸드셰이크 순서가 달라 연결이 성립한 뒤 50초 주기로 끊긴다 |
+| **아웃바운드** | **TCP 443 하나** — 인핸스가 전달하는 AgentOS 주소 |
+| 인바운드 | **없음** |
+| 사내망 | 대상 DB로의 아웃바운드 TCP (예: Oracle 1521) |
+| 리소스 | CPU 0.1 core · 메모리 128MB로 충분 |
+
+루트 권한, 커널 모듈, 특수 capability는 필요하지 않다. 컨테이너는 비루트(uid 1001)로 실행된다.
+
+---
+
+## 설치 전에 주고받을 것
+
+| 순서 | 인핸스 → 고객사 | 고객사 → 인핸스 |
+|---|---|---|
+| 1 | agent 이름(`agent.id`), **서버 공개키**, AgentOS 접속 주소, 이미지 태그 | — |
+| 2 | — | **agent 공개키** (아래 3단계에서 생성) |
+| 3 | 등록·승인 완료 통보 | — |
+
+**개인키는 어느 방향으로도 오가지 않는다.** 승인 전에 agent를 먼저 띄워도 된다. 계속 재시도하다가 승인되는 즉시 연결된다.
+
+<Callout type="info">
+  **서버 공개키**는 테넌트마다 다른 값이며 AgentOS 관리 화면에서 언제든 다시 볼 수 있다. 반면 VM에서 만든 **agent 개인키**는 재발급 시 재승인이 필요하므로 백업 정책에 포함해 두어야 한다.
+</Callout>
+
+### 환경별 주소
+
+SaaS는 주소가 고정이고, 온프렘은 설치마다 다르다. 아래 값만 환경에 따라 바뀌고 나머지 절차는 같다.
+
+| 항목 | SaaS (production) | 온프렘 |
+|---|---|---|
+| agent 접속 주소 (`gateway.base_url`) | `wss://data-connector.commerceos.ai/api/tunnel` | `wss://<data-connector 주소>/api/tunnel` (인핸스가 설치 시 전달) |
+| 서버 공개키 조회 (관리 API) | `https://app-api-v2.commerceos.ai/tunnel/server-key` | `https://<app-api 주소>/tunnel/server-key` |
+| 아웃바운드 방화벽 | `data-connector.commerceos.ai:443` | 위 data-connector 주소의 `443` |
+
+<Callout type="warning">
+  두 주소는 **서로 다른 서비스**이다. agent는 data-connector로 붙고, 관리 화면·키 조회는 app-api이다. 온프렘에서 하나만 받았다면 나머지 하나를 인핸스에 확인한다.
+</Callout>
+
+---
+
+## 설치
+
+### 1. 이미지 받기
+
+```bash
+# 인핸스가 전달한 네임스페이스와 태그로 교체
+docker pull <namespace>/commerce-os-aos-tunnel:v0.61.1
+```
+
+**태그를 고정한다.** `latest`는 언제 바뀌는지 알 수 없어 재기동 시점에 예고 없이 버전이 올라간다.
+
+외부 레지스트리에 접근할 수 없는 환경이면 [부록 · 에어갭 설치](#부록-에어갭-설치)를 참고한다.
+
+### 2. 설정 디렉토리 만들기
+
+```bash
+sudo mkdir -p /etc/aostun
+sudo chown 1001:1001 /etc/aostun
+sudo chmod 0750 /etc/aostun
+```
+
+<Callout type="warning">
+  **소유자를 `1001`로 두는 것이 중요하다.** 컨테이너가 uid **1001**로 실행되므로, 마운트한 파일의 소유자가 다르면 agent가 키와 설정을 읽지 못한다. Docker 기반 설치에서 가장 흔한 실패 원인이다. 호스트에 같은 uid의 사용자가 없어도 무방하며, 숫자만 맞으면 된다.
+</Callout>
+
+### 3. 키쌍 만들기
+
+```bash
+docker run --rm \
+  -v /etc/aostun:/etc/aostun \
+  <namespace>/commerce-os-aos-tunnel:v0.61.1 \
+  keygen --out /etc/aostun/agent.key
+```
+
+```text
+private key written to /etc/aostun/agent.key
+public key (share this with AgentOS):
+ed25519:vVWDYbxVei/V0J7cvWimVyMjD87qZqxVXtXUuWMwTIc=
+```
+
+출력된 **공개키(`ed25519:`로 시작하는 한 줄)만** 인핸스에 전달한다. 개인키 파일은 `0600`으로 만들어지며, 권한이 느슨하면 agent가 기동을 거부한다.
+
+공개키를 다시 봐야 하면 키를 새로 만들지 말고 기존 파일에서 읽는다.
+
+```bash
+docker run --rm -v /etc/aostun:/etc/aostun:ro \
+  <namespace>/commerce-os-aos-tunnel:v0.61.1 \
+  pubkey --key /etc/aostun/agent.key
+```
+
+<Callout type="info">
+  이미 `agent.key`가 있으면 `keygen`은 덮어쓰지 않고 실패한다. 승인된 키를 실수로 날리는 것을 막기 위해서다. 재발급이 필요하면 기존 파일을 옮긴 뒤 다시 실행하고, 새 공개키를 인핸스에 전달해 재승인을 받는다.
+</Callout>
+
+### 4. 설정 파일 작성
+
+`/etc/aostun/agent.yaml`:
+
+```yaml
+agent:
+  id: tenant-42-dc1                    # 인핸스와 합의한 이름
+  private_key_file: /etc/aostun/agent.key
+
+gateway:
+  base_url: wss://data-connector.commerceos.ai/api/tunnel   # SaaS. 온프렘은 인핸스가 전달한 주소
+  server_public_key: "ed25519:XesZRGPrikrZ..."     # 관리 화면에서 복사 (테넌트별)
+
+  # SSL 검사 장비가 있으면 사내 CA 를 지정
+  # tls_ca_file: /etc/aostun/corp-ca.pem
+  # 사내 프록시를 거쳐야 하면
+  # http_proxy: "http://proxy.corp.local:8080"
+
+egress:
+  allow:                               # 여기 없는 목적지는 무조건 거부
+    - cidr: 10.20.0.0/24
+      ports: [1521]
+
+limits:
+  max_connections: 16                  # 동시 접속 상한
+  dial_timeout: 5s
+```
+
+```bash
+sudo chown 1001:1001 /etc/aostun/agent.yaml
+sudo chmod 0640 /etc/aostun/agent.yaml
+```
+
+<Callout type="warning">
+  **`egress.allow`가 이 설치의 핵심이다.** AgentOS가 무엇을 요청하든 이 목록 밖이면 agent가 거부한다. "AgentOS가 우리 내부망에서 무엇에 닿을 수 있나"라는 질문의 답이 이 파일 하나에 있어야 한다는 것이 설계 의도이다. **알 수 없는 필드가 있으면 기동을 거부하므로** 오타가 조용히 넘어가지 않는다.
+</Callout>
+
+#### `server_public_key`는 어디서 오나
+
+**AgentOS 화면에서 확인한다.** 서버 키는 **테넌트마다 따로** 발급되므로 고객사별로 값이 다르다. 관리 화면의 터널 설정에서 그대로 복사해 넣는다. `ed25519:`로 시작하는 한 줄이며 공개키라 그대로 주고받아도 무해하다.
+
+화면 대신 API로 확인하려면 로그인 토큰과 `tunnel read` 권한이 필요하다. 이 주소는 관리 API 쪽이라 `base_url`과 도메인이 다르다.
+
+```bash
+curl -H "Authorization: Bearer $TOKEN" -H "X-Tenant-ID: $COMPANY_ID" \
+  https://app-api-v2.commerceos.ai/tunnel/server-key | jq -r .data.publicKey   # 온프렘은 app-api 주소
+```
+
+아직 발급된 키가 없으면 `data`가 `null`로 내려온다. 같은 경로에 `POST`(`tunnel manage` 권한)로 발급하면 된다. 개인키는 app-api가 암호화해 보관하며 밖으로 나오지 않는다.
+
+이 값은 생략할 수 없다. 기업망은 TLS를 검사 장비에서 종단하는 경우가 흔한데, TLS만 믿으면 그 장비가 AgentOS 행세를 하며 agent의 서명을 받아낼 수 있다. agent는 **서버를 먼저 검증**하고 통과한 뒤에야 자기 서명을 보낸다.
+
+### 5. 실행
+
+#### docker compose (권장)
+
+`/etc/aostun/docker-compose.yml`:
+
+```yaml
+services:
+  aostun-agent:
+    image: <namespace>/commerce-os-aos-tunnel:v0.61.1
+    container_name: aostun-agent
+    restart: always
+    # 사내망 라우팅이 호스트 인터페이스에 묶여 있으면 host 네트워크가 확실합니다.
+    # bridge 로도 대개 동작하니, 막히면 아래 트러블슈팅을 보세요.
+    network_mode: host
+    read_only: true
+    cap_drop: ["ALL"]
+    security_opt: ["no-new-privileges:true"]
+    volumes:
+      - /etc/aostun:/etc/aostun:ro
+    command: ["agent", "--config=/etc/aostun/agent.yaml", "--log-format=json"]
+    logging:
+      driver: json-file
+      options: { max-size: "10m", max-file: "3" }
+```
+
+```bash
+cd /etc/aostun && sudo docker compose up -d
+sudo docker compose logs -f
+```
+
+#### docker run
+
+```bash
+sudo docker run -d --name aostun-agent --restart=always \
+  --network host \
+  --read-only --cap-drop ALL --security-opt no-new-privileges:true \
+  --log-opt max-size=10m --log-opt max-file=3 \
+  -v /etc/aostun:/etc/aostun:ro \
+  <namespace>/commerce-os-aos-tunnel:v0.61.1 \
+  agent --config=/etc/aostun/agent.yaml --log-format=json
+```
+
+`--read-only`와 `--cap-drop ALL`을 걸어도 정상 동작한다. agent는 파일을 쓰지 않고 특수 권한도 쓰지 않는다. 로그 크기 제한을 두지 않으면 장기 운영 시 디스크를 채울 수 있다.
+
+### 6. 확인
+
+정상이면 다음 두 줄이 나온다.
+
+```text
+agent starting   agent_id=tenant-42-dc1 gateway=wss://... pool_size=16
+                 egress_allow="[10.20.0.0/24 ports=[1521]]"
+tunnel established  agent_id=tenant-42-dc1 tenant_id=42 session_id=... pool_size=16
+```
+
+1. `agent starting`의 `egress_allow`가 의도한 목록과 같은지 확인한다. 설정이 실제로 읽혔는지 확인하는 단계다.
+2. `tunnel established`가 등장하면 인증과 승인까지 통과한 것이다.
+3. 인핸스 측 화면에서 이 agent가 **온라인**으로 보이는지 교차 확인한다.
+
+`tunnel established`가 나오지 않고 경고가 반복되면 아래 트러블슈팅 표에서 메시지를 찾는다.
+
+---
+
+## 트러블슈팅
+
+| 메시지 | 원인과 조치 |
+|---|---|
+| `permission denied` / `no such file` | **가장 흔한 경우.** 마운트한 파일 소유자가 uid 1001이 아니다. `sudo chown -R 1001:1001 /etc/aostun` |
+| `private key file must not be readable by group or others` | 개인키 권한이 느슨하다. `sudo chmod 600 /etc/aostun/agent.key` |
+| `gateway identity does not match the pinned key` | `server_public_key`가 실제 서버 키와 다르다. 인핸스에서 받은 값을 다시 확인한다. 값을 붙여넣을 때 줄바꿈이 섞이지 않았는지도 확인한다. |
+| `agent is not registered` | 인핸스에 등록되지 않았거나, `agent.id`가 합의한 값과 다르다. |
+| `승인 대기 중입니다` | 등록은 됐고 승인 전이다. 그대로 두면 승인 즉시 연결된다. |
+| `dial ...: context deadline exceeded` | 아웃바운드 443이 막혔거나 프록시를 거쳐야 한다. `http_proxy` · `tls_ca_file`을 확인한다. |
+| `destination is not in egress.allow` | **agent가 거부한 것이다.** 의도한 목적지라면 `egress.allow`에 추가하고 재시작한다. |
+| `could not reach the internal host` | allowlist는 통과했지만 사내망에서 그 주소에 닿지 못한다. 컨테이너 네트워크 모드와 사내 방화벽을 확인한다. |
+| `read challenge: ... context canceled` (50초 주기로 반복) | **agent 버전이 낮다** (`v0.61.0` 이하). 연결은 되는데 서버가 기다리는 첫 프레임을 보내지 않아 양쪽이 서로 기다린다. `v0.61.1` 이상으로 올린다. |
+| 연결됐다가 반복 끊김 | 프록시·방화벽의 idle timeout이다. agent가 자동 재연결하므로 동작에는 문제가 없지만, 로그가 시끄러우면 인핸스에 알린다. |
+
+### 사내망에 닿지 않을 때 — 네트워크 모드
+
+`network_mode: host`가 가장 확실하다. bridge 모드에서는 컨테이너가 NAT를 거쳐 나가므로, 사내망 라우팅이 특정 인터페이스나 소스 IP에 묶여 있으면 닿지 않는다. bridge를 유지해야 한다면 컨테이너 안에서 도달 여부를 먼저 확인한다.
+
+```bash
+sudo docker run --rm --network bridge busybox \
+  timeout 5 nc -zv 10.20.0.5 1521
+```
+
+---
+
+## 운영
+
+| 작업 | 방법 |
+|---|---|
+| 업그레이드 | 태그를 바꿔 `docker compose up -d`. 진행 중이던 연결은 끊기지만 AgentOS가 재시도하므로 파이프라인은 이어진다. 사전 공지 후 진행하면 충분하다. 최소 버전은 `v0.61.1`이다. |
+| 일시 중단 | `docker compose stop`. AgentOS 쪽에서는 오프라인으로 보이고, 사내망 접근이 즉시 차단된다. 되돌리려면 `start`만 하면 된다. |
+| 접근 범위 변경 | `agent.yaml`의 `egress.allow`를 수정하고 재시작한다. 무중단 리로드는 아직 없다. |
+| 로그 | `--log-format=json`이면 연결마다 `req_id` · 목적지 · 전송 바이트수 · 소요시간이 남는다. 감사 기록으로 그대로 쓸 수 있다. |
+
+---
+
+## 부록: 에어갭 설치
+
+외부 레지스트리에 접근할 수 없으면 이미지를 파일로 전달받아 적재한다. agent 바이너리는 정적 링크라 런타임에 외부에서 무엇도 받아오지 않는다.
+
+```bash
+# 인터넷이 되는 곳에서
+docker pull <namespace>/commerce-os-aos-tunnel:v0.61.1
+docker save <namespace>/commerce-os-aos-tunnel:v0.61.1 | gzip > aostun-v0.61.1.tar.gz
+sha256sum aostun-v0.61.1.tar.gz          # 전달 후 대조
+
+# 사내 VM 에서
+sha256sum aostun-v0.61.1.tar.gz
+gunzip -c aostun-v0.61.1.tar.gz | sudo docker load
+```
+
+<Callout type="info">
+  컨테이너 런타임 자체가 없는 환경이면 단일 실행 파일 + systemd 방식도 제공한다. 필요하면 인핸스에 요청한다.
+</Callout>
+
+---
+
+## 한 장으로 요약
+
+```bash
+# 1. 이미지
+docker pull <namespace>/commerce-os-aos-tunnel:v0.61.1
+
+# 2. 디렉토리 (소유자 1001 이 중요)
+sudo mkdir -p /etc/aostun && sudo chown 1001:1001 /etc/aostun && sudo chmod 0750 /etc/aostun
+
+# 3. 키쌍 — 출력된 공개키를 인핸스에 전달
+docker run --rm -v /etc/aostun:/etc/aostun \
+  <namespace>/commerce-os-aos-tunnel:v0.61.1 keygen --out /etc/aostun/agent.key
+
+# 4. /etc/aostun/agent.yaml 작성 후
+sudo chown 1001:1001 /etc/aostun/agent.yaml && sudo chmod 0640 /etc/aostun/agent.yaml
+
+# 5. 실행
+cd /etc/aostun && sudo docker compose up -d
+
+# 6. 확인 — "tunnel established" 가 보이면 완료
+sudo docker compose logs -f
+```
