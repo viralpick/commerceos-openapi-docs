@@ -8,7 +8,7 @@ AgentOS가 **인바운드 방화벽 개방 없이** 사내 DB에 접속할 수 �
 | 구분 | 내용 |
 |---|---|
 | 설치 방식 | Docker 이미지 기반 |
-| 이미지 | `<namespace>/commerce-os-aos-tunnel` |
+| 이미지 | `commerceos/commerce-os-aos-tunnel` |
 | 지원 플랫폼 | Linux amd64 / arm64 |
 
 ---
@@ -73,8 +73,8 @@ SaaS는 주소가 고정이고, 온프렘은 설치마다 다르다. 아래 값�
 ### 1. 이미지 받기
 
 ```bash
-# 인핸스가 전달한 네임스페이스와 태그로 교체
-docker pull <namespace>/commerce-os-aos-tunnel:v0.61.1
+# 태그는 인핸스가 전달한 버전으로 교체
+docker pull commerceos/commerce-os-aos-tunnel:v0.61.1
 ```
 
 **태그를 고정한다.** `latest`는 언제 바뀌는지 알 수 없어 재기동 시점에 예고 없이 버전이 올라간다.
@@ -98,7 +98,7 @@ sudo chmod 0750 /etc/aostun
 ```bash
 docker run --rm \
   -v /etc/aostun:/etc/aostun \
-  <namespace>/commerce-os-aos-tunnel:v0.61.1 \
+  commerceos/commerce-os-aos-tunnel:v0.61.1 \
   keygen --out /etc/aostun/agent.key
 ```
 
@@ -114,7 +114,7 @@ ed25519:vVWDYbxVei/V0J7cvWimVyMjD87qZqxVXtXUuWMwTIc=
 
 ```bash
 docker run --rm -v /etc/aostun:/etc/aostun:ro \
-  <namespace>/commerce-os-aos-tunnel:v0.61.1 \
+  commerceos/commerce-os-aos-tunnel:v0.61.1 \
   pubkey --key /etc/aostun/agent.key
 ```
 
@@ -183,7 +183,7 @@ curl -H "Authorization: Bearer $TOKEN" -H "X-Tenant-ID: $COMPANY_ID" \
 ```yaml
 services:
   aostun-agent:
-    image: <namespace>/commerce-os-aos-tunnel:v0.61.1
+    image: commerceos/commerce-os-aos-tunnel:v0.61.1
     container_name: aostun-agent
     restart: always
     # 사내망 라우팅이 호스트 인터페이스에 묶여 있으면 host 네트워크가 확실합니다.
@@ -213,7 +213,7 @@ sudo docker run -d --name aostun-agent --restart=always \
   --read-only --cap-drop ALL --security-opt no-new-privileges:true \
   --log-opt max-size=10m --log-opt max-file=3 \
   -v /etc/aostun:/etc/aostun:ro \
-  <namespace>/commerce-os-aos-tunnel:v0.61.1 \
+  commerceos/commerce-os-aos-tunnel:v0.61.1 \
   agent --config=/etc/aostun/agent.yaml --log-format=json
 ```
 
@@ -280,8 +280,8 @@ sudo docker run --rm --network bridge busybox \
 
 ```bash
 # 인터넷이 되는 곳에서
-docker pull <namespace>/commerce-os-aos-tunnel:v0.61.1
-docker save <namespace>/commerce-os-aos-tunnel:v0.61.1 | gzip > aostun-v0.61.1.tar.gz
+docker pull commerceos/commerce-os-aos-tunnel:v0.61.1
+docker save commerceos/commerce-os-aos-tunnel:v0.61.1 | gzip > aostun-v0.61.1.tar.gz
 sha256sum aostun-v0.61.1.tar.gz          # 전달 후 대조
 
 # 사내 VM 에서
@@ -299,14 +299,14 @@ gunzip -c aostun-v0.61.1.tar.gz | sudo docker load
 
 ```bash
 # 1. 이미지
-docker pull <namespace>/commerce-os-aos-tunnel:v0.61.1
+docker pull commerceos/commerce-os-aos-tunnel:v0.61.1
 
 # 2. 디렉토리 (소유자 1001 이 중요)
 sudo mkdir -p /etc/aostun && sudo chown 1001:1001 /etc/aostun && sudo chmod 0750 /etc/aostun
 
 # 3. 키쌍 — 출력된 공개키를 인핸스에 전달
 docker run --rm -v /etc/aostun:/etc/aostun \
-  <namespace>/commerce-os-aos-tunnel:v0.61.1 keygen --out /etc/aostun/agent.key
+  commerceos/commerce-os-aos-tunnel:v0.61.1 keygen --out /etc/aostun/agent.key
 
 # 4. /etc/aostun/agent.yaml 작성 후
 sudo chown 1001:1001 /etc/aostun/agent.yaml && sudo chmod 0640 /etc/aostun/agent.yaml
