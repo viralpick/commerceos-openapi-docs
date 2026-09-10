@@ -28,7 +28,7 @@ Agent는 **TCP 바이트만 중계한다.** 데이터를 해석하거나 저장�
 |---|---|
 | OS | Linux x86_64 또는 arm64 (배포판 무관) |
 | 런타임 | Docker 20.10+ 또는 동등한 컨테이너 런타임 |
-| **agent 버전** | **`v0.61.1` 이상.** 그 아래는 서버와 핸드셰이크 순서가 달라 연결이 성립한 뒤 50초 주기로 끊긴다 |
+| **agent 버전** | **최신 `v0.64.0` 권장.** 최소 `v0.61.1` 이상이어야 하며, 그 아래는 서버와 핸드셰이크 순서가 달라 연결이 성립한 뒤 50초 주기로 끊긴다. `egress.allow`의 이름(`host`) 규칙은 `v0.64.0` 이상에서 지원된다 |
 | **아웃바운드** | **TCP 443 하나** — 인핸스가 전달하는 AgentOS 주소 |
 | 인바운드 | **없음** |
 | 사내망 | 대상 DB로의 아웃바운드 TCP (예: Oracle 1521) |
@@ -74,7 +74,7 @@ SaaS는 주소가 고정이고, 온프렘은 설치마다 다르다. 아래 값�
 
 ```bash
 # 태그는 인핸스가 전달한 버전으로 교체
-docker pull commerceos/commerce-os-aos-tunnel:v0.61.1
+docker pull commerceos/commerce-os-aos-tunnel:v0.64.0
 ```
 
 **태그를 고정한다.** `latest`는 언제 바뀌는지 알 수 없어 재기동 시점에 예고 없이 버전이 올라간다.
@@ -98,7 +98,7 @@ sudo chmod 0750 /etc/aostun
 ```bash
 docker run --rm \
   -v /etc/aostun:/etc/aostun \
-  commerceos/commerce-os-aos-tunnel:v0.61.1 \
+  commerceos/commerce-os-aos-tunnel:v0.64.0 \
   keygen --out /etc/aostun/agent.key
 ```
 
@@ -114,7 +114,7 @@ ed25519:vVWDYbxVei/V0J7cvWimVyMjD87qZqxVXtXUuWMwTIc=
 
 ```bash
 docker run --rm -v /etc/aostun:/etc/aostun:ro \
-  commerceos/commerce-os-aos-tunnel:v0.61.1 \
+  commerceos/commerce-os-aos-tunnel:v0.64.0 \
   pubkey --key /etc/aostun/agent.key
 ```
 
@@ -142,8 +142,12 @@ gateway:
 
 egress:
   allow:                               # 여기 없는 목적지는 무조건 거부
-    - cidr: 10.20.0.0/24
+    - cidr: 10.20.0.0/24          # 주소 규칙 — IP 리터럴만, 이름을 풀지 않음 (기존 동작 그대로)
       ports: [1521]
+    - host: sap.corp.local        # 이름 규칙 — agent 가 고객사 DNS 로 풀어 dial
+      ports: [44300]
+    - host: "*.s4.corp.local"     # 한 레이블 이상 아래의 모든 이름 (bare 접미는 미포함)
+      ports: [44300]
 
 limits:
   max_connections: 16                  # 동시 접속 상한
@@ -158,6 +162,16 @@ sudo chmod 0640 /etc/aostun/agent.yaml
 <Callout type="warning">
   **`egress.allow`가 이 설치의 핵심이다.** AgentOS가 무엇을 요청하든 이 목록 밖이면 agent가 거부한다. "AgentOS가 우리 내부망에서 무엇에 닿을 수 있나"라는 질문의 답이 이 파일 하나에 있어야 한다는 것이 설계 의도이다. **알 수 없는 필드가 있으면 기동을 거부하므로** 오타가 조용히 넘어가지 않는다.
 </Callout>
+
+#### `egress.allow` 규칙 종류
+
+| 규칙 | 예시 | 동작 |
+|---|---|---|
+| 주소 규칙 (`cidr`) | `10.20.0.0/24` | IP 리터럴로 요청된 목적지만 매칭한다. 이름을 풀지 않으며, 기존 동작 그대로다. |
+| 이름 규칙 (`host`) | `sap.corp.local` | 정확히 일치하는 호스트 이름을 허용한다. agent가 **고객사 DNS**로 이름을 풀어 dial 하므로, VM에서 그 이름이 해석되어야 한다. |
+| 와일드카드 (`host`) | `"*.s4.corp.local"` | 접미 아래 **한 레이블 이상**의 모든 이름을 허용한다(예: `db1.s4.corp.local`, `a.b.s4.corp.local`). bare 접미(`s4.corp.local` 자체)는 포함되지 않으므로 필요하면 별도 규칙으로 추가한다. |
+
+각 규칙의 `ports`는 해당 규칙에만 적용된다. 이름 규칙은 `v0.64.0` 이상에서 지원되며, 그 아래 버전은 `host` 필드를 알 수 없는 필드로 보고 기동을 거부한다.
 
 #### `server_public_key`는 어디서 오나
 
@@ -183,7 +197,7 @@ curl -H "Authorization: Bearer $TOKEN" -H "X-Tenant-ID: $COMPANY_ID" \
 ```yaml
 services:
   aostun-agent:
-    image: commerceos/commerce-os-aos-tunnel:v0.61.1
+    image: commerceos/commerce-os-aos-tunnel:v0.64.0
     container_name: aostun-agent
     restart: always
     # 사내망 라우팅이 호스트 인터페이스에 묶여 있으면 host 네트워크가 확실합니다.
@@ -213,7 +227,7 @@ sudo docker run -d --name aostun-agent --restart=always \
   --read-only --cap-drop ALL --security-opt no-new-privileges:true \
   --log-opt max-size=10m --log-opt max-file=3 \
   -v /etc/aostun:/etc/aostun:ro \
-  commerceos/commerce-os-aos-tunnel:v0.61.1 \
+  commerceos/commerce-os-aos-tunnel:v0.64.0 \
   agent --config=/etc/aostun/agent.yaml --log-format=json
 ```
 
@@ -267,7 +281,7 @@ sudo docker run --rm --network bridge busybox \
 
 | 작업 | 방법 |
 |---|---|
-| 업그레이드 | 태그를 바꿔 `docker compose up -d`. 진행 중이던 연결은 끊기지만 AgentOS가 재시도하므로 파이프라인은 이어진다. 사전 공지 후 진행하면 충분하다. 최소 버전은 `v0.61.1`이다. |
+| 업그레이드 | 태그를 바꿔 `docker compose up -d`. 진행 중이던 연결은 끊기지만 AgentOS가 재시도하므로 파이프라인은 이어진다. 사전 공지 후 진행하면 충분하다. 최소 버전은 `v0.61.1`, 최신은 `v0.64.0`이다. |
 | 일시 중단 | `docker compose stop`. AgentOS 쪽에서는 오프라인으로 보이고, 사내망 접근이 즉시 차단된다. 되돌리려면 `start`만 하면 된다. |
 | 접근 범위 변경 | `agent.yaml`의 `egress.allow`를 수정하고 재시작한다. 무중단 리로드는 아직 없다. |
 | 로그 | `--log-format=json`이면 연결마다 `req_id` · 목적지 · 전송 바이트수 · 소요시간이 남는다. 감사 기록으로 그대로 쓸 수 있다. |
@@ -280,13 +294,13 @@ sudo docker run --rm --network bridge busybox \
 
 ```bash
 # 인터넷이 되는 곳에서
-docker pull commerceos/commerce-os-aos-tunnel:v0.61.1
-docker save commerceos/commerce-os-aos-tunnel:v0.61.1 | gzip > aostun-v0.61.1.tar.gz
-sha256sum aostun-v0.61.1.tar.gz          # 전달 후 대조
+docker pull commerceos/commerce-os-aos-tunnel:v0.64.0
+docker save commerceos/commerce-os-aos-tunnel:v0.64.0 | gzip > aostun-v0.64.0.tar.gz
+sha256sum aostun-v0.64.0.tar.gz          # 전달 후 대조
 
 # 사내 VM 에서
-sha256sum aostun-v0.61.1.tar.gz
-gunzip -c aostun-v0.61.1.tar.gz | sudo docker load
+sha256sum aostun-v0.64.0.tar.gz
+gunzip -c aostun-v0.64.0.tar.gz | sudo docker load
 ```
 
 <Callout type="info">
@@ -299,14 +313,14 @@ gunzip -c aostun-v0.61.1.tar.gz | sudo docker load
 
 ```bash
 # 1. 이미지
-docker pull commerceos/commerce-os-aos-tunnel:v0.61.1
+docker pull commerceos/commerce-os-aos-tunnel:v0.64.0
 
 # 2. 디렉토리 (소유자 1001 이 중요)
 sudo mkdir -p /etc/aostun && sudo chown 1001:1001 /etc/aostun && sudo chmod 0750 /etc/aostun
 
 # 3. 키쌍 — 출력된 공개키를 인핸스에 전달
 docker run --rm -v /etc/aostun:/etc/aostun \
-  commerceos/commerce-os-aos-tunnel:v0.61.1 keygen --out /etc/aostun/agent.key
+  commerceos/commerce-os-aos-tunnel:v0.64.0 keygen --out /etc/aostun/agent.key
 
 # 4. /etc/aostun/agent.yaml 작성 후
 sudo chown 1001:1001 /etc/aostun/agent.yaml && sudo chmod 0640 /etc/aostun/agent.yaml
