@@ -2,7 +2,7 @@ import { Callout } from 'nextra/components'
 
 # 개인 계정으로 연결 (OAuth)
 
-Claude·Cursor 같은 외부 MCP 클라이언트에 주소 **하나**를 등록하고 AgentOS 계정으로 로그인하면, 로그인한 사람의 권한 안에서 온톨로지 챗·AI Builder·App Builder Magician 도구를 쓸 수 있습니다.
+Claude Code에 주소 **하나**를 등록하고 AgentOS 계정으로 로그인하면, 로그인한 사람의 권한 안에서 온톨로지 챗·AI Builder·App Builder Magician 도구를 쓸 수 있습니다.
 
 [서버 발급](/mcp/create-server) 방식과는 별개의 연결입니다.
 
@@ -15,6 +15,10 @@ Claude·Cursor 같은 외부 MCP 클라이언트에 주소 **하나**를 등록�
 
 두 방식은 토큰도 도구도 공유하지 않습니다.
 
+<Callout type="warning">
+  현재는 **Claude Code만 지원**합니다. Cursor 등 다른 MCP 클라이언트의 자동 등록(DCR)은 막혀 있습니다.
+</Callout>
+
 ---
 
 ## 연결하기
@@ -22,38 +26,39 @@ Claude·Cursor 같은 외부 MCP 클라이언트에 주소 **하나**를 등록�
 주소는 하나이며, 회사마다 따로 등록하지 않습니다.
 
 ```
-https://agent-api.commerceos.ai/mcp/me
+https://os.enhans.ai/agent-api/mcp/me
 ```
 
-### 1. 클라이언트에 주소 등록
+### 1. 서버 등록
 
-**Claude (웹·데스크톱)**
-설정 → 커넥터 → **사용자 지정 커넥터 추가**에 위 주소를 넣습니다.
-
-**Claude Code**
-
-```bash
-claude mcp add --transport http agentos https://agent-api.commerceos.ai/mcp/me
-```
-
-등록 후 세션에서 `/mcp`를 실행해 인증합니다.
-
-**Cursor**
-`~/.cursor/mcp.json`의 `mcpServers`에 추가합니다. 인증 헤더는 필요 없습니다.
+프로젝트 루트의 `.mcp.json`에 아래 내용을 추가합니다.
 
 ```json
 {
   "mcpServers": {
     "agentos": {
-      "url": "https://agent-api.commerceos.ai/mcp/me"
+      "type": "http",
+      "url": "https://os.enhans.ai/agent-api/mcp/me",
+      "oauth": { "clientId": "agentos-mcp-cli", "callbackPort": 23449 }
     }
   }
 }
 ```
 
-### 2. AgentOS 계정으로 로그인
+또는 터미널에서 아래 명령으로 등록할 수 있습니다.
 
-브라우저에 AgentOS 로그인 화면이 열리면 웹과 같은 계정으로 로그인합니다. 로그인은 처음 연결할 때와 토큰이 만료됐을 때만 다시 요구됩니다.
+```bash
+claude mcp add --transport http --client-id agentos-mcp-cli --callback-port 23449 \
+  agentos https://os.enhans.ai/agent-api/mcp/me
+```
+
+### 2. 로그인
+
+1. Claude Code에서 `/mcp`를 입력하고 **agentos → Authenticate**를 선택합니다.
+2. 브라우저가 열리면 AgentOS 계정으로 로그인합니다.
+3. **Connected to agentos**가 표시되면 완료입니다.
+
+로그인은 처음 연결할 때와 토큰이 만료됐을 때만 다시 요구됩니다.
 
 <Callout type="info">
   AgentOS 구성원으로 등록된 계정이어야 합니다. 등록되지 않은 계정은 403으로 거절됩니다.
@@ -81,7 +86,7 @@ claude mcp add --transport http agentos https://agent-api.commerceos.ai/mcp/me
 알아 둘 점:
 
 - **도구 목록과 실제 호출은 다릅니다.** 클라이언트의 도구 목록에는 어느 회사에서든 열릴 수 있는 도구가 모두 보입니다. 목록에 있어도 고른 회사에서 기능이 꺼져 있거나 권한이 없으면 호출 때 거절됩니다.
-- **Action 실행에는 되묻는 단계가 없습니다.** 웹 챗의 확인 화면 대신 MCP 클라이언트의 도구 승인이 그 역할을 합니다. 실행 기록에는 로그인한 사람이 실행자로 남습니다.
+- **Action 실행에는 되묻는 단계가 없습니다.** 웹 챗의 확인 화면 대신 Claude Code의 도구 승인이 그 역할을 합니다. 실행 기록에는 로그인한 사람이 실행자로 남습니다.
 - **회사를 바꿀 때는 확인을 거치도록 안내합니다.** 다른 회사로 옮겨 쓰기 전에 사용자 확인을 받으라는 규칙은 클라이언트 지시문에만 있고, 서버가 막지는 않습니다. 작업 중 회사가 바뀌었는지 응답에서 확인하세요.
 - `company_id`는 문자열로 주고받습니다.
 
@@ -89,10 +94,12 @@ claude mcp add --transport http agentos https://agent-api.commerceos.ai/mcp/me
 
 ## 문제 해결
 
-| 증상 | 원인 | 조치 |
-| --- | --- | --- |
-| 403 "AgentOS 사용자로 등록되지 않은 계정입니다" | 로그인한 계정이 AgentOS 구성원이 아님 | 관리자에게 구성원 등록을 요청하세요. |
-| "회사 N 에 권한이 없습니다" | 그 회사에 역할이 배정되지 않음 | 해당 회사 관리자에게 역할 배정을 요청하세요. |
-| "회사 N 에서는 'X' 을 쓸 수 없습니다" | 그 회사에서 해당 기능이 꺼져 있거나 권한이 없음 | 위 도구 표의 조건을 확인하고 관리자에게 문의하세요. |
-| 로그인해도 다시 로그인 화면이 뜸 | 토큰이 만료됐거나 인증 설정 문제 | 한 번 더 로그인하고, 반복되면 관리자에게 문의하세요. |
-| 로그인 화면이 열리지 않음 / 503 | 서버 쪽 인증 설정 문제 | 관리자에게 문의하세요. |
+| 증상 | 해결 |
+| --- | --- |
+| 로그인 후 브라우저에 404 또는 연결 오류가 표시됨 | 23449 포트를 다른 프로그램이 쓰고 있을 수 있습니다. `lsof -nP -iTCP:23449`로 확인한 뒤 해당 프로그램을 종료하세요. 이미 열린 오류 페이지라면 주소창의 URL 전체를 복사해 Claude Code 인증 화면에 붙여 넣으면 로그인이 완료됩니다. |
+| `needs authentication`이 계속 표시됨 | `/mcp` → agentos → **Clear authentication** → **Authenticate** 순서로 다시 로그인하세요. |
+| `.mcp.json`을 수정했는데 반영되지 않음 | Claude Code를 재시작하세요. |
+| 403 "AgentOS 사용자로 등록되지 않은 계정입니다" | 로그인한 계정이 AgentOS 구성원이 아닙니다. 관리자에게 구성원 등록을 요청하세요. |
+| "회사 N 에 권한이 없습니다" | 그 회사에 역할이 배정되지 않았습니다. 해당 회사 관리자에게 역할 배정을 요청하세요. |
+| "회사 N 에서는 'X' 을 쓸 수 없습니다" | 그 회사에서 해당 기능이 꺼져 있거나 권한이 없습니다. 위 도구 표의 조건을 확인하고 관리자에게 문의하세요. |
+| 로그인 화면이 열리지 않음 / 503 | 서버 쪽 인증 설정 문제입니다. 관리자에게 문의하세요. |
