@@ -24,11 +24,17 @@ jobs:
       - name: Build project
         run: npm run build
 
-      - name: create CNAME file
-        run: cd ./out && echo docs.commerceos.ai > CNAME && cd ..
+      # basePath=/docs 빌드 결과를 gh-pages 의 /docs 아래에 둔다 — os.enhans.ai/docs 가 이 경로를 그대로 프록시한다.
+      # 루트는 /docs/ 로 보내고, 404.html 이 예전 링크(/mcp 등)를 /docs/mcp 로 넘긴다. CNAME 은 루트에 있어야 custom domain 이 유지된다.
+      - name: Stage site
+        run: |
+          mkdir site && mv out site/docs
+          echo docs.commerceos.ai > site/CNAME
+          echo '<meta http-equiv="refresh" content="0;url=/docs/">' > site/index.html
+          echo '<script>if(!location.pathname.startsWith("/docs"))location.replace("/docs"+location.pathname+location.search+location.hash)</script><p>Page not found. <a href="/docs/">Docs</a></p>' > site/404.html
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./out
+          publish_dir: ./site
