@@ -59,7 +59,7 @@ SaaS는 주소가 고정이고, 온프렘은 설치마다 다르다. 아래 값�
 | 항목 | SaaS (production) | 온프렘 |
 |---|---|---|
 | agent 접속 주소 (`gateway.base_url`) | `wss://data-connector.commerceos.ai/api/tunnel` | `wss://<data-connector 주소>/api/tunnel` (인핸스가 설치 시 전달) |
-| 서버 공개키 조회 (관리 API) | `https://app-api-v2.commerceos.ai/tunnel/server-key` | `https://<app-api 주소>/tunnel/server-key` |
+| 서버 공개키 조회 (관리 API) | `https://os.enhans.ai/api/tunnel/server-key` | `https://<app-api 주소>/tunnel/server-key` |
 | 아웃바운드 방화벽 | `data-connector.commerceos.ai:443` | 위 data-connector 주소의 `443` |
 
 <Callout type="warning">
@@ -181,7 +181,7 @@ sudo chmod 0640 /etc/aostun/agent.yaml
 
 ```bash
 curl -H "Authorization: Bearer $TOKEN" -H "X-Tenant-ID: $COMPANY_ID" \
-  https://app-api-v2.commerceos.ai/tunnel/server-key | jq -r .data.publicKey   # 온프렘은 app-api 주소
+  https://os.enhans.ai/api/tunnel/server-key | jq -r .data.publicKey   # 온프렘은 app-api 주소
 ```
 
 아직 발급된 키가 없으면 `data`가 `null`로 내려온다. 같은 경로에 `POST`(`tunnel manage` 권한)로 발급하면 된다. 개인키는 app-api가 암호화해 보관하며 밖으로 나오지 않는다.
