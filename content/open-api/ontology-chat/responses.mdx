@@ -1,0 +1,246 @@
+# 질문 보내기 (responses)
+
+웹의 AI 채팅(온톨로지 챗)과 같은 에이전트에게 질문을 보내고 답을 받는 API입니다.
+
+- 대화는 **API Key를 발급한 사용자의 채팅**으로 저장되며, 웹 채팅 목록에도 그대로 보입니다.
+- 필드 이름은 OpenAI Responses API처럼 `snake_case`입니다.
+- `stream=true`면 SSE로 중간 과정을 흘려 주고, `stream=false`면 끝난 뒤 최종 응답 하나를 JSON으로 돌려줍니다.
+
+## Authentication
+
+```bash
+curl -N -X POST https://os.enhans.ai/api/open/v1/ontology-chat/responses \
+     -H "Authorization: Bearer YOUR_API_KEY" \
+     -H "Content-Type: application/json"
+```
+
+> 발급한 사용자가 없는 레거시 API Key는 채팅 주인을 세울 수 없어 거절됩니다(403). 사용자 계정에서 발급한 키를 사용하세요.
+
+## Endpoint
+
+**Endpoint**: `POST /open/v1/ontology-chat/responses`
+
+### Request
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `Authorization` (Header) | string | Yes | `Bearer {API_KEY}` |
+| `input` (Body) | string | 조건부 | 질문. `answer`와 둘 중 하나만 넣습니다. |
+| `answer` (Body) | object | 조건부 | 에이전트가 되물은 질문(`response.input_required`)에 대한 답. `chat_id`가 함께 있어야 합니다. |
+| `answer.question_id` (Body) | string | Yes | `input_required`로 받은 `question_id` |
+| `answer.text` (Body) | string | Yes | 답. `options` 중 하나를 그대로 넣거나 직접 적습니다. |
+| `chat_id` (Body) | integer | No | 이어서 대화할 채팅. 비우면 새 채팅을 만듭니다. 응답의 `chat_id`를 다음 요청에 넣으면 대화가 이어집니다. |
+| `file_ids` (Body) | string[] | No | [첨부 파일 업로드](/open-api/ontology-chat/files)로 받은 `file_id`. `input`과 함께만 쓸 수 있습니다. 기본값 `[]` |
+| `stream` (Body) | boolean | No | SSE 사용 여부. 기본값 `true` |
+| `model` (Body) | string | No | 모델 코드. `default`면 웹 채팅의 기본 모델. 기본값 `default` |
+
+#### 규칙
+
+- `input`과 `answer` 중 **정확히 하나**만 넣습니다. 둘 다 있거나 둘 다 없으면 400입니다.
+- `file_ids`는 `input`과 함께만 보냅니다. 본인이 이 회사에서 올린 파일이 아니면 404(`FileNotFound`)입니다.
+- `chat_id`는 API Key 발급자가 주인인 온톨로지 챗이어야 합니다. 아니면 404(`ChatNotFound`)입니다.
+- 같은 채팅에 답하는 중 다시 요청하면 409입니다. 거의 동시에 보낸 요청은 200으로 열린 뒤 `status: failed`, `error.code: chat_busy`로 바로 끝날 수 있습니다. 여러 질문을 동시에 보내려면 `chat_id` 없이 보내 대화를 나눕니다.
+- 새 채팅의 이름은 질문 앞 50자로 자동 생성됩니다.
+
+> **타임아웃을 넉넉히 두세요.** 에이전트는 스키마 확인, 조회, 재시도를 여러 번 거쳐 답하므로 길면 몇 분 걸립니다. 클라이언트와 중간 프록시(nginx 등)의 읽기 시간 제한을 300초 정도로 두고, 진행 상황이 필요하면 `stream: true`를 씁니다.
+
+### Example Request (새 질문, 스트리밍)
+
+```bash
+curl -N -X POST https://os.enhans.ai/api/open/v1/ontology-chat/responses \
+     -H "Authorization: Bearer YOUR_API_KEY" \
+     -H "Content-Type: application/json" \
+     -d '{
+       "input": "지난달 카테고리별 매출 알려줘",
+       "stream": true,
+       "model": "default",
+       "file_ids": []
+     }'
+```
+
+### Example Request (이어서 대화, 비스트리밍)
+
+```bash
+curl -X POST https://os.enhans.ai/api/open/v1/ontology-chat/responses \
+     -H "Authorization: Bearer YOUR_API_KEY" \
+     -H "Content-Type: application/json" \
+     -d '{
+       "chat_id": 1234,
+       "input": "그중 상위 3개만 다시 보여줘",
+       "stream": false
+     }'
+```
+
+## Response (`stream=false`)
+
+`Content-Type: application/json`. 마지막 `response.*` 이벤트의 `response` 객체만 돌려줍니다. 공통 `ResponseBody` 래퍼로 감싸지지 **않습니다**.
+
+> 기다리는 동안 연결이 끊기지 않도록 본문 앞에 공백 문자가 먼저 내려올 수 있습니다. JSON 파서는 앞 공백을 허용하므로 그대로 파싱하면 됩니다.
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `id` | string | 이 턴의 응답 ID |
+| `chat_id` | integer | 채팅 ID. 다음 요청에 넣으면 대화가 이어집니다. |
+| `status` | string | `completed` / `failed` / `incomplete` |
+| `output_text` | string | 최종 답변. `completed`일 때만 있습니다. |
+| `error` | object | `failed`일 때. `{ "code", "message" }` |
+| `incomplete_details` | object | `incomplete`일 때. `{ "reason": "input_required" \| "unsupported_prompt" }` |
+| `input_required` | object | `reason`이 `input_required`일 때 에이전트가 되물은 질문. 아래 참고 |
+
+```json
+{
+  "id": "6f0c0f3a-...",
+  "chat_id": 1234,
+  "status": "completed",
+  "output_text": "지난달 카테고리별 매출은 ..."
+}
+```
+
+| `status` | 의미 |
+|----------|------|
+| `completed` | 답변 완료 |
+| `failed` | 실행 중 오류. `error.code` 예: `chat_busy`(같은 채팅이 답하는 중), `stream_interrupted`(에이전트 연결이 끊김) |
+| `incomplete` | 답이 나오기 전에 멈춤. `incomplete_details.reason`이 `input_required`면 되물은 질문에 답해야 하고, `unsupported_prompt`면 API로는 답할 수 없는 확인(온톨로지 액션 실행 확인 등)에서 멈춘 것입니다. |
+
+## Response (`stream=true`)
+
+`Content-Type: text/event-stream`. 각 프레임은 `event:`와 `data:` 두 줄이며, `data`의 JSON에는 이벤트 이름이 `type`으로 한 번 더 실립니다. 보낼 것이 없으면 15초마다 `: ping` 주석이 옵니다.
+
+```
+event: response.created
+data: {"type":"response.created","response":{"id":"6f0c...","chat_id":1234,"status":"in_progress"}}
+
+event: response.output_item.added
+data: {"type":"response.output_item.added","item":{"type":"tool_call","step_id":"s1","step_type":"ontology_query","label":"매출 조회","status":"in_progress"}}
+
+event: response.output_item.done
+data: {"type":"response.output_item.done","item":{"type":"tool_call","step_id":"s1","step_type":"ontology_query","label":"매출 조회","status":"completed"}}
+
+event: agent.tool_result
+data: {"type":"agent.tool_result","step_id":"s1","status":"ok","summary":"12행 조회","duration_ms":"830"}
+
+: ping
+
+event: response.output_text.delta
+data: {"type":"response.output_text.delta","step_id":"s2","delta":"지난달 "}
+
+event: response.output_text.done
+data: {"type":"response.output_text.done","step_id":"s2","text":"지난달 카테고리별 매출은 ..."}
+
+event: response.completed
+data: {"type":"response.completed","response":{"id":"6f0c...","chat_id":1234,"status":"completed","output_text":"지난달 카테고리별 매출은 ..."}}
+```
+
+### 이벤트 순서
+
+1. `response.created` — 턴 시작. `response.status`는 `in_progress`
+2. 도구 진행 · 답변 조각 (0회 이상, 아래 표)
+3. `response.completed` / `response.failed` / `response.incomplete` 중 하나 — 턴 종료. `response` 객체 구조는 비스트리밍 응답과 같습니다.
+
+### 중간 이벤트
+
+| Event | Payload | Description |
+|-------|---------|-------------|
+| `response.output_item.added` | `{ item }` | 도구 호출 시작. `item.type`은 `tool_call`, 공통 필드 `step_id`, `step_type`, `label`, `status`(`in_progress`) |
+| `response.function_call_arguments.done` | `{ step_id, arguments }` | 도구 호출 인자. 상세 권한이 있을 때만 |
+| `response.output_item.done` | `{ item }` | 도구 호출 종료(`tool_call`, 같은 `step_id`로 `status`: `completed` / `error`) 또는 답변 메시지 확정(`message`: `step_id`, `text`) |
+| `agent.tool_result` | `{ step_id, status, summary, duration_ms }` | 도구 결과 요약. `status`는 `ok` / `error`. 상세 권한이 있으면 `sql`, `raw_output`, `error_detail`이 추가됩니다. |
+| `response.output_text.delta` | `{ step_id, delta }` | 답변 텍스트 조각 |
+| `response.output_text.done` | `{ step_id, text }` | 답변 텍스트 전체 |
+| `response.input_required` | `{ question_id, question, options }` | 에이전트가 되물음. 이어서 `response.incomplete`로 턴이 끝납니다. |
+| `agent.status` | `{ state, detail? }` | 에이전트 상태 변화 |
+| `error` | `{ code, message }` | 실행 중 오류. 이어서 `response.failed`로 턴이 끝납니다. |
+
+> 도구 이름 · 인자 · SQL · 원본 출력 같은 상세 필드는 API Key 발급자에게 `chat.run` read 권한이 있을 때만 실립니다. 모델의 중간 추론(`response.reasoning_summary_text.*`)은 내보내지 않습니다.
+
+### 연동 시 주의
+
+- 도구가 여러 개 겹쳐 돌아 종료 · 결과 이벤트가 시작 순서대로 오지 않습니다. `step_id`로 시작과 끝을 짝지으세요.
+- `response.output_item.done`은 도구가 아닌 답변(`message`) 항목에도 같은 이름으로 옵니다. `item.type`으로 구분하세요.
+- `agent.tool_result.duration_ms`는 현재 문자열(예: `"223"`)로 옵니다. 숫자로 바뀔 예정이니 둘 다 받을 수 있게 처리하세요.
+
+### 중지
+
+연결을 끊으면 서버가 그 턴을 멈춥니다. 화면의 중지 버튼은 요청을 취소(abort)하는 것으로 만들면 됩니다. 끊은 직후 같은 채팅으로 바로 보내면 409 또는 `chat_busy`를 한 번 받을 수 있습니다.
+
+### Example (Python 스트리밍)
+
+`BASE`, `HEADERS`는 [빠른 시작](/open-api/ontology-chat#빠른-시작)과 같습니다.
+
+```python
+import json, requests
+
+with requests.post(
+    f"{BASE}/open/v1/ontology-chat/responses",
+    headers=HEADERS,
+    json={"input": "지난달 채널별 매출을 알려줘"},  # stream 기본값 true
+    stream=True,
+    timeout=(10, 300),  # 연결 10초, 읽기 300초
+) as res:
+    event = None
+    for line in res.iter_lines(decode_unicode=True):
+        if not line or line.startswith(":"):  # 빈 줄 · ping
+            continue
+        if line.startswith("event:"):
+            event = line[6:].strip()
+        elif line.startswith("data:"):
+            data = json.loads(line[5:])
+            if event == "response.output_item.added":
+                print("단계 시작", data["item"]["step_id"], data["item"].get("label"))
+            elif event == "response.output_text.delta":
+                print(data["delta"], end="", flush=True)
+            elif event in ("response.completed", "response.failed", "response.incomplete"):
+                final = data["response"]
+                break
+```
+
+## 되물음에 답하기 (HITL)
+
+에이전트가 사용자에게 확인을 요청하면 턴이 `incomplete`(`reason: input_required`)로 끝납니다. 받은 `question_id`로 답을 보내면 멈춘 자리부터 이어집니다.
+
+**1. 되물음을 받음**
+
+```json
+{
+  "id": "6f0c...",
+  "chat_id": 1234,
+  "status": "incomplete",
+  "incomplete_details": { "reason": "input_required" },
+  "input_required": {
+    "question_id": "98765",
+    "question": "어느 기준으로 집계할까요?",
+    "options": ["주문일", "결제일"]
+  }
+}
+```
+
+**2. 답을 보냄**
+
+```bash
+curl -N -X POST https://os.enhans.ai/api/open/v1/ontology-chat/responses \
+     -H "Authorization: Bearer YOUR_API_KEY" \
+     -H "Content-Type: application/json" \
+     -d '{
+       "chat_id": 1234,
+       "answer": { "question_id": "98765", "text": "결제일" },
+       "stream": true
+     }'
+```
+
+- 기다리는 질문이 없거나 `question_id`가 다르면 409입니다.
+- `answer` 대신 새 `input`을 보내면 되물은 질문을 버리고 새로 시작합니다.
+- `incomplete_details.reason`이 `unsupported_prompt`인 확인은 API로 답할 수 없습니다. 웹 채팅에서 이어서 진행하세요.
+
+## 에러
+
+| Status | 상황 |
+|--------|------|
+| 400 | `input`/`answer` 둘 다 있거나 둘 다 없음, `answer`에 `chat_id` 누락, `file_ids`를 `answer`와 함께 보냄 |
+| 403 | 발급자가 없는 레거시 API Key |
+| 404 | 본인 소유가 아닌 `chat_id` 또는 `file_ids` |
+| 409 | 같은 채팅이 답하는 중, 또는 기다리는 질문이 없는데 `answer`를 보냄 |
+| 502 | 에이전트 서버 연결 실패 |
+
+스트림이 열린 뒤의 오류는 HTTP 상태가 아니라 `response.failed` 이벤트(또는 비스트리밍이면 `status: failed`)로 옵니다. 한 턴은 최대 30분이며 그보다 길면 연결을 끊습니다.
+
+401 · passport 오류 등 공통 오류는 [문제 해결](/open-api/ontology-chat/troubleshooting)을 참고하세요.

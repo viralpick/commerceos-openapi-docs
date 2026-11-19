@@ -1,0 +1,64 @@
+# 첨부 파일 업로드
+
+질문에 첨부할 파일을 올리고 `file_id`를 받는 API입니다. 웹 채팅의 첨부 업로드와 같은 권한 · 형식 · 크기 제한이 적용됩니다.
+
+파일은 API Key를 발급한 사용자의 파일로 저장됩니다. 받은 `file_id`를 [질문 보내기](/open-api/ontology-chat/responses)의 `file_ids`에 넣습니다.
+
+## Endpoint
+
+**Endpoint**: `POST /open/v1/ontology-chat/files`
+
+### Request
+
+`Content-Type: multipart/form-data`
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `Authorization` (Header) | string | Yes | `Bearer {API_KEY}` |
+| `file` (Form) | file | Yes | 업로드할 파일 |
+
+#### 제한
+
+- 크기: 기본 **5MB** (서버 설정 `FILE_MAX_UPLOAD_SIZE_MB`에 따라 다를 수 있음)
+- 확장자: `txt` `md` `csv` `tsv` `json` `jsonl` `xml` `yaml` `yml` `pdf` `docx` `xlsx` `pptx` `hwpx` `zip` `doc` `xls` `ppt` `hwp` `parquet` `png` `jpg` `jpeg` `gif`
+- 파일 내용이 확장자와 맞지 않으면 400입니다.
+
+### Example Request
+
+```bash
+curl -X POST https://os.enhans.ai/api/open/v1/ontology-chat/files \
+     -H "Authorization: Bearer YOUR_API_KEY" \
+     -F "file=@./sales.csv"
+```
+
+### Response
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `data.file_id` | string | 파일 ID (UUID). `file_ids`에 넣습니다. |
+| `data.name` | string | 원본 파일 이름 |
+
+```json
+{
+  "code": "SUCCESS",
+  "message": "OK",
+  "data": {
+    "file_id": "3b4b2a7e-9c1d-4f3e-8a2b-1c2d3e4f5a6b",
+    "name": "sales.csv"
+  },
+  "traceId": "00-xxxxx-xxxxx-01"
+}
+```
+
+### 질문에 첨부하기
+
+```bash
+curl -N -X POST https://os.enhans.ai/api/open/v1/ontology-chat/responses \
+     -H "Authorization: Bearer YOUR_API_KEY" \
+     -H "Content-Type: application/json" \
+     -d '{
+       "input": "이 파일의 매출을 카테고리별로 요약해줘",
+       "file_ids": ["3b4b2a7e-9c1d-4f3e-8a2b-1c2d3e4f5a6b"],
+       "stream": true
+     }'
+```
