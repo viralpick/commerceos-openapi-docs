@@ -1,0 +1,101 @@
+# 채팅 목록 · 대화 내역
+
+API Key를 발급한 사용자의 온톨로지 챗을 조회하는 API입니다. 웹에서 만든 채팅도 포함됩니다.
+
+## 채팅 목록
+
+**Endpoint**: `GET /open/v1/ontology-chat/chats`
+
+최근 메시지 순으로 정렬됩니다.
+
+### Example Request
+
+```bash
+curl https://os.enhans.ai/api/open/v1/ontology-chat/chats \
+     -H "Authorization: Bearer YOUR_API_KEY"
+```
+
+### Response
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `data[].chat_id` | integer | 채팅 ID |
+| `data[].name` | string | 채팅 이름 |
+| `data[].created_at` | string | 생성 시각 |
+| `data[].last_message_at` | string | 마지막 메시지 시각. 메시지가 없으면 `created_at`과 같습니다. |
+
+```json
+{
+  "code": "SUCCESS",
+  "message": "OK",
+  "data": [
+    {
+      "chat_id": 1234,
+      "name": "지난달 카테고리별 매출 알려줘",
+      "created_at": "2026-11-07T09:12:30",
+      "last_message_at": "2026-11-07T09:13:02"
+    }
+  ],
+  "traceId": "00-xxxxx-xxxxx-01"
+}
+```
+
+## 대화 내역
+
+**Endpoint**: `GET /open/v1/ontology-chat/chats/{chatId}/messages`
+
+### Request
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `chatId` (Path) | integer | Yes | 채팅 ID. API Key 발급자 소유의 온톨로지 챗이어야 합니다. |
+| `page` (Query) | integer | No | 페이지 번호. **0이 가장 최근 쪽**입니다. 기본값 `0` |
+| `size` (Query) | integer | No | 페이지 크기. 1~100. 기본값 `20` |
+
+### Example Request
+
+```bash
+curl "https://os.enhans.ai/api/open/v1/ontology-chat/chats/1234/messages?page=0&size=20" \
+     -H "Authorization: Bearer YOUR_API_KEY"
+```
+
+### Response
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `data.chat_id` | integer | 채팅 ID |
+| `data.messages[]` | object[] | 메시지 목록. 쪽 안에서는 **오래된 것부터** 놓입니다. |
+| `data.messages[].id` | string | 메시지 ID |
+| `data.messages[].role` | string | `user` 또는 `assistant` |
+| `data.messages[].content` | string | 메시지 본문 |
+| `data.messages[].is_error` | boolean | 오류 메시지 여부 |
+| `data.page` | integer | 현재 페이지 |
+| `data.size` | integer | 페이지 크기 |
+| `data.total` | integer | 전체 메시지 수 |
+| `data.has_next` | boolean | 더 오래된 페이지가 있는지 |
+
+```json
+{
+  "code": "SUCCESS",
+  "message": "OK",
+  "data": {
+    "chat_id": 1234,
+    "messages": [
+      { "id": "98764", "role": "user", "content": "지난달 카테고리별 매출 알려줘", "is_error": false },
+      { "id": "98765", "role": "assistant", "content": "지난달 카테고리별 매출은 ...", "is_error": false }
+    ],
+    "page": 0,
+    "size": 20,
+    "total": 2,
+    "has_next": false
+  },
+  "traceId": "00-xxxxx-xxxxx-01"
+}
+```
+
+### 에러
+
+| Status | 상황 |
+|--------|------|
+| 400 | `page`가 0 미만이거나 `size`가 1~100 범위 밖 |
+| 404 | 본인 소유가 아니거나 온톨로지 챗이 아닌 `chatId` |

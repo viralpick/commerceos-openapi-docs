@@ -4,5 +4,6 @@ export default {
     ontologies: 'Ontologies',
     sql: 'SQL',
     works: 'Works',
-    pipelines: 'Pipelines'
+    pipelines: 'Pipelines',
+    'ontology-chat': 'Ontology Chat'
 }

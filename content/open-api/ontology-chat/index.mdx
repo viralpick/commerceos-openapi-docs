@@ -1,0 +1,78 @@
+# 온톨로지 챗 API
+
+AOS 웹의 AI 에이전트 채팅을 내 서비스에서 API로 부르는 방법입니다. 질문을 보내면 에이전트가 온톨로지를 조회해 답합니다.
+
+- 웹 화면의 AI 에이전트 채팅과 같은 에이전트, 같은 시스템 프롬프트와 툴로 답합니다.
+- 응답은 OpenAI Responses API와 비슷한 모양이라 필드 이름이 `snake_case`입니다.
+- **AOS v0.84.0 이상**(온프렘 포함)에서 사용할 수 있습니다.
+
+## Endpoints
+
+| Endpoint | 하는 일 | 필요한 권한 |
+|----------|---------|-------------|
+| [`POST /open/v1/ontology-chat/responses`](/open-api/ontology-chat/responses) | 질문하고 답을 받습니다. 새 대화를 만들거나 이어 갑니다. | `chat` · create |
+| [`POST /open/v1/ontology-chat/files`](/open-api/ontology-chat/files) | 질문에 첨부할 파일을 올립니다. | `file` · edit |
+| [`GET /open/v1/ontology-chat/chats`](/open-api/ontology-chat/chats) | 대화 목록 | `chat` · read |
+| [`GET /open/v1/ontology-chat/chats/{chatId}/messages`](/open-api/ontology-chat/chats) | 한 대화의 메시지 내역 | `chat` · read |
+
+Base URL과 인증 방식은 다른 Open API와 같습니다([공통 사항](/open-api/common)). 요청 필드 설명은 Swagger(`/swagger-ui/index.html`)의 Open API 묶음에도 있습니다.
+
+## 인증과 권한
+
+```
+Authorization: Bearer {API_KEY}
+```
+
+- **누구의 권한으로 도는가**: API Key를 만든 사람의 권한입니다. 그 사람이 볼 수 있는 온톨로지만 조회하고, 그 사람의 역할에 위 표의 권한이 있어야 합니다.
+- **대화는 어디에 저장되나**: 키를 만든 사람의 채팅으로 저장됩니다. 그래서 웹 화면의 채팅 목록에도 보이고, 웹에서 만든 채팅도 `GET /chats`에 나옵니다.
+- **서비스용 키 권장**: 사람 계정 대신 서비스용 계정을 만들어 필요한 권한만 주고, 그 계정으로 키를 발급받는 것을 권합니다. 대화 기록도 한곳에 모입니다.
+
+## 빠른 시작
+
+1. AOS 화면에서 [API Key를 발급](/open-api)받습니다. 키를 만든 계정에 채팅 권한이 있는지 확인합니다.
+2. `stream: false`로 질문을 보냅니다. 에이전트가 끝까지 답한 뒤 JSON 하나로 돌려줍니다.
+3. 응답의 `status`가 `completed`면 `output_text`가 답입니다. 이어 물으려면 `chat_id`를 다음 요청에 넣습니다.
+
+### Example Request (curl)
+
+```bash
+curl -X POST https://os.enhans.ai/api/open/v1/ontology-chat/responses \
+     -H "Authorization: Bearer YOUR_API_KEY" \
+     -H "Content-Type: application/json" \
+     -d '{"input": "지난달 채널별 매출을 알려줘", "stream": false}'
+```
+
+### Example Request (Python)
+
+```python
+import requests
+
+BASE = "https://os.enhans.ai/api"
+HEADERS = {"Authorization": f"Bearer {API_KEY}"}
+
+res = requests.post(
+    f"{BASE}/open/v1/ontology-chat/responses",
+    headers=HEADERS,
+    json={"input": "지난달 채널별 매출을 알려줘", "stream": False},
+    timeout=300,  # 에이전트가 여러 번 조회하면 몇 분 걸릴 수 있습니다
+)
+body = res.json()
+if body["status"] == "completed":
+    print(body["output_text"])
+chat_id = body["chat_id"]  # 이어 묻기에 씁니다
+```
+
+### Response
+
+```json
+{
+  "id": "5b1c2e9a-...",
+  "chat_id": 1234,
+  "status": "completed",
+  "output_text": "지난달 채널별 매출은 다음과 같습니다. ..."
+}
+```
+
+> **타임아웃을 넉넉히 두세요.** 에이전트는 스키마 확인, 조회, 재시도를 여러 번 거쳐 답합니다. 보통 수 초에서 수십 초, 길면 몇 분 걸립니다. 호출하는 클라이언트와 중간 프록시(nginx 등)의 읽기 시간 제한을 300초 정도로 두세요. 기다리는 동안 진행 상황을 보여 주려면 `stream: true`를 씁니다.
+
+스트리밍, 이어 묻기, 되물음 처리는 [질문 보내기](/open-api/ontology-chat/responses)를 참고하세요.
