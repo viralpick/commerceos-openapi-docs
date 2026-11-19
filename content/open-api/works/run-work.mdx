@@ -7,7 +7,7 @@ Agent를 통해 Work를 실행하기 위한 API입니다.
 API에 접근하기 위해 API Key가 필요합니다. 예시:
 
 ```bash
-curl -X POST https://app-api-v2.commerceos.ai/open/v1/works/{workKey}/run \
+curl -X POST https://os.enhans.ai/api/open/v1/works/{workKey}/run \
      -H "Authorization: Bearer YOUR_API_KEY" \
      -H "Content-Type: application/json"
 ```
@@ -31,7 +31,7 @@ curl -X POST https://app-api-v2.commerceos.ai/open/v1/works/{workKey}/run \
 #### Example Request
 
 ```bash
-curl -X POST https://app-api-v2.commerceos.ai/open/v1/works/your-work-key/run \
+curl -X POST https://os.enhans.ai/api/open/v1/works/your-work-key/run \
      -H "Authorization: Bearer YOUR_API_KEY" \
      -H "Content-Type: application/json" \
      -d '{

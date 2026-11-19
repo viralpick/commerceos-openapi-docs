@@ -123,14 +123,14 @@ Authorization: Bearer sk_live_xxxxxxxxxxxxxxxx
 ### curl — 본문 없이 실행
 
 ```bash
-curl -X POST "https://{host}/open/v1/pipelines/company_123_daily_sales_sync/run" \
+curl -X POST "https://os.enhans.ai/api/open/v1/pipelines/company_123_daily_sales_sync/run" \
   -H "Authorization: Bearer YOUR_API_KEY"
 ```
 
 ### curl — `conf` 전달
 
 ```bash
-curl -X POST "https://{host}/open/v1/pipelines/company_123_daily_sales_sync/run" \
+curl -X POST "https://os.enhans.ai/api/open/v1/pipelines/company_123_daily_sales_sync/run" \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
