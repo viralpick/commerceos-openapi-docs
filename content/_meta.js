@@ -1,6 +1,5 @@
 export default {
-  "getting-started": { title: "Getting Started", href: "https://os.enhans.ai/docs" },
-  index: { title: "Getting Started", display: "hidden" },
+  index: "Getting Started",
   ontology: "Ontology",
   "agentic-work": "Agentic Work",
   "open-api": "Open API",
