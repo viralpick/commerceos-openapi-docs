@@ -1,0 +1,14 @@
+/* Synapse — font loading (see foundations.md §2.1).
+   Imported by preview.html (and shippable with the harness) so every render loads
+   the system faces regardless of what the viewer has installed locally.
+
+   Scope of THIS file: the two OFL families (Pretendard + JetBrains Mono), pulled
+   from jsDelivr. Both licenses also permit self-hosting later — swap these @imports
+   for local @font-face blocks against assets/fonts/ if the CDN dependency is dropped.
+
+   Artific (commercial, Power Type Foundry) is NOT here: its @font-face is declared
+   in tokens/synapse.css and self-hosted from assets/fonts/ under Enhans' webfont
+   license (gitignored, never on a public CDN or mirror). See foundations.md §2.1. */
+
+@import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css");
+@import url("https://cdn.jsdelivr.net/npm/@fontsource/jetbrains-mono@5.0.0/index.min.css");

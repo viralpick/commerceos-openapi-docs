@@ -1,4 +1,20 @@
 /* styles/global.css */
+/* Synapse 토큰: commerce-os/synapse-harness/tokens 에서 복사 (v2.9.0). 직접 수정하지 말고 새 릴리스에서 다시 복사.
+   Nextra 다크모드는 html.dark 클래스라, 복사 후 다크 셀렉터에 .dark 를 붙인다:
+   sed -i '' 's/^\[data-theme="dark"\] {/.dark, [data-theme="dark"] {/' styles/synapse/synapse.css */
+@import "./synapse/fonts.css";
+@import "./synapse/synapse.css";
+
+/* Nextra 폰트를 Synapse 폰트로 교체 (Nextra 쪽은 @layer theme 이라 여기 unlayered 선언이 이김) */
+:root {
+    --x-font-sans: var(--sy-font-sans);
+    --x-font-mono: var(--sy-font-mono);
+}
+
+body {
+    color: var(--sy-text-primary);
+}
+
 table {
     width: 100%;
     border-collapse: collapse;
@@ -6,11 +22,11 @@ table {
 
 th,
 td {
-    border: 1px solid #ccc;
-    padding: 8px;
+    border: 1px solid var(--sy-border-default);
+    padding: var(--sy-space-2);
     text-align: left;
 }
 
 th {
-    background-color: #f4f4f4;
+    background-color: var(--sy-bg-sunken);
 }

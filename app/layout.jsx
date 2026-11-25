@@ -16,7 +16,15 @@ export const metadata = {
 export default async function RootLayout({ children }) {
   return (
     <html lang="ko" dir="ltr" suppressHydrationWarning>
-      <Head backgroundColor={{ dark: "#0f172a", light: "#ffffff" }} />
+      {/* Synapse: bg = --sy-bg-page, primary = --sy-action-brand-fg-on-page (#0D61B5 / #7BBBFC) 를 HSL 로 환산 */}
+      <Head
+        backgroundColor={{ dark: "#09090B", light: "#FFFFFF" }}
+        color={{
+          hue: 210,
+          saturation: { light: 87, dark: 95 },
+          lightness: { light: 38, dark: 74 },
+        }}
+      />
       <body>
         <Layout
           navbar={
