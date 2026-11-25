@@ -28,9 +28,13 @@ export default async function RootLayout({ children }) {
       <body>
         <Layout
           navbar={
-            <Navbar logo={<Image src={logo} alt="AgentOS" height={64} />} />
+            <Navbar
+              logo={<Image src={logo} alt="AgentOS" height={64} />}
+              logoLink="https://os.enhans.ai/docs"
+            />
           }
           pageMap={await getPageMap()}
+          sidebar={{ defaultMenuCollapseLevel: 1 }}
           editLink={null}
         >
           {children}
